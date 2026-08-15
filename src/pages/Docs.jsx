@@ -18,7 +18,7 @@ export default function Docs() {
           return (
             <Link
               key={slug}
-              to={`/docs/${lang}/${slug}`}
+              to={`/docs/${slug}`}
               className="docs-item docs-item--link"
             >
               <span className="docs-item__path">{slug}.md</span>

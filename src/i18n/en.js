@@ -467,7 +467,7 @@ export default {
       "agent-behavior": "What the agent must do (reference)",
       configuration: "wpm.config.json reference",
     },
-    note: "Each page exists in French (FR) and English (EN): the FR/EN button at the top of a page switches between the two.",
+    note: "The documentation is available in French and English: the FR/EN switch (at the top of the page) determines the language read.",
     docNote: "These docs are also in the GitHub repo",
     githubLabel: "wpm-system on GitHub",
     notFound: "This documentation page does not exist.",

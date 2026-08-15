@@ -467,7 +467,7 @@ export default {
       "agent-behavior": "Ce que l'agent doit faire (référence)",
       configuration: "Référence wpm.config.json",
     },
-    note: "Chaque page existe en français (FR) et en anglais (EN) : le bouton FR/EN en haut d'une page bascule entre les deux.",
+    note: "La documentation est proposée en français et en anglais : le commutateur FR/EN (en haut de page) détermine la langue lue.",
     docNote: "Ces docs sont aussi dans le dépôt GitHub",
     githubLabel: "wpm-system sur GitHub",
     notFound: "Cette page de documentation n'existe pas.",

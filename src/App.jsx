@@ -18,7 +18,7 @@ export default function App() {
         <Route path="/installation" element={<Installation />} />
         <Route path="/architecture" element={<Architecture />} />
         <Route path="/docs" element={<Docs />} />
-        <Route path="/docs/:lang/:slug" element={<DocPage />} />
+        <Route path="/docs/:slug" element={<DocPage />} />
       </Routes>
     </Layout>
   );
