@@ -16,7 +16,7 @@
         if (rest && rest !== "index.html") {
           sessionStorage.setItem(
             "wpm-redirect",
-            "/" + rest.replace(/^\/+/, "").replace(/\/+$/, ""),
+            base + rest.replace(/^\/+/, "").replace(/\/+$/, ""),
           );
         }
         location.replace(base + "index.html");
