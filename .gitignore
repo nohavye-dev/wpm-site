@@ -1,0 +1,6 @@
+# weighted persistent memory
+.wpm/
+
+# dependencies / build
+node_modules/
+dist/

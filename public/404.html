@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WPM — Weighted Persistent Memory</title>
+    <script>
+      (function () {
+        var base = "/wpm-site/";
+        var path = location.pathname;
+        var rest = "";
+        if (path.indexOf(base) === 0) {
+          rest = path.slice(base.length);
+        } else if (path.indexOf("/wpm-site") === 0) {
+          rest = path.slice("/wpm-site".length);
+        }
+        if (rest && rest !== "index.html") {
+          sessionStorage.setItem(
+            "wpm-redirect",
+            "/" + rest.replace(/^\/+/, "").replace(/\/+$/, ""),
+          );
+        }
+        location.replace(base + "index.html");
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
