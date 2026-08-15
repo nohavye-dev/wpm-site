@@ -11,6 +11,7 @@ export default function Navbar() {
     { to: "/installation", label: t("nav.installation") },
     { to: "/architecture", label: t("nav.architecture") },
     { to: "/docs", label: t("nav.docs") },
+    { href: t("common.repoUrl"), label: t("common.github"), external: true },
   ];
 
   return (
@@ -21,18 +22,30 @@ export default function Navbar() {
           <span className="navbar__tagline">Weighted Persistent Memory</span>
         </Link>
         <nav className="navbar__links">
-          {links.map((l) => (
-            <NavLink
-              key={l.to}
-              to={l.to}
-              end={l.to === "/"}
-              className={({ isActive }) =>
-                isActive ? "navbar__link is-active" : "navbar__link"
-              }
-            >
-              {l.label}
-            </NavLink>
-          ))}
+          {links.map((l) =>
+            l.href ? (
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="navbar__link"
+              >
+                {l.label}
+              </a>
+            ) : (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.to === "/"}
+                className={({ isActive }) =>
+                  isActive ? "navbar__link is-active" : "navbar__link"
+                }
+              >
+                {l.label}
+              </NavLink>
+            )
+          )}
         </nav>
         <div className="navbar__lang">
           <button

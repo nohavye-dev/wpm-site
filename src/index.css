@@ -686,6 +686,18 @@ code {
   margin-bottom: 8px;
 }
 
+.docs-item--link {
+  display: flex;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.docs-item--link:hover {
+  border-color: var(--accent);
+  background: var(--card-hover);
+  text-decoration: none;
+}
+
 .docs-item__path {
   font-family: var(--mono);
   font-size: 0.88rem;
@@ -694,6 +706,155 @@ code {
 }
 
 .docs-item__desc { color: var(--text-dim); font-size: 0.92rem; }
+
+/* ── Docs detail ───────────────────────────────────── */
+
+.doc-crumbs {
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  margin: 0 0 20px;
+}
+
+.doc-crumbs a { color: var(--text-dim); }
+.doc-crumbs a:hover { color: var(--text); }
+
+.doc-crumbs__sep {
+  margin: 0 8px;
+  color: var(--text-faint);
+}
+
+.doc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.doc-toolbar .page__title { margin: 0; }
+
+.doc-lang {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.doc-lang .lang-btn { text-decoration: none; }
+
+/* ── Markdown ──────────────────────────────────────── */
+
+.markdown {
+  max-width: 800px;
+}
+
+.markdown h1 {
+  font-size: 1.9rem;
+  margin: 0 0 20px;
+}
+
+.markdown h2 {
+  font-size: 1.35rem;
+  margin: 40px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.markdown h3 {
+  font-size: 1.08rem;
+  margin: 28px 0 10px;
+  color: var(--text);
+}
+
+.markdown h4 {
+  font-size: 1rem;
+  margin: 22px 0 8px;
+}
+
+.markdown p {
+  margin: 0 0 16px;
+}
+
+.markdown a { color: var(--accent-2); }
+
+.markdown ul,
+.markdown ol {
+  margin: 0 0 16px;
+  padding-left: 24px;
+}
+
+.markdown li { margin: 4px 0; }
+
+.markdown li > p { margin: 0; }
+
+.markdown strong { color: var(--text); }
+
+.markdown blockquote {
+  margin: 0 0 16px;
+  padding: 6px 16px;
+  border-left: 3px solid var(--accent);
+  background: rgba(139, 92, 246, 0.06);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-dim);
+}
+
+.markdown blockquote p:last-child { margin-bottom: 0; }
+
+.markdown pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0 0 16px;
+}
+
+.markdown pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: #d8ccff;
+}
+
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 16px;
+  font-size: 0.94rem;
+}
+
+.markdown th,
+.markdown td {
+  text-align: left;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+}
+
+.markdown thead th {
+  background: var(--bg-soft);
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.markdown tbody tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.markdown hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 36px 0;
+}
+
+.markdown code {
+  font-size: 0.88em;
+  color: #d8ccff;
+}
 
 /* ── Responsive ─────────────────────────────────────── */
 

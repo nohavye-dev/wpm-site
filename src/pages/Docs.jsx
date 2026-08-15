@@ -1,29 +1,47 @@
+import { Link } from "react-router-dom";
 import { useI18n } from "../i18n/I18nContext.jsx";
+import { DOCS, DOC_ORDER } from "../docs/docsData.js";
 
 export default function Docs() {
-  const { t } = useI18n();
-  const groups = t("docs.groups");
+  const { t, lang } = useI18n();
+  const items = DOCS[lang];
 
   return (
     <div className="page container">
       <h1 className="page__title">{t("docs.title")}</h1>
       <p className="page__intro">{t("docs.intro")}</p>
 
-      {groups.map((group, gi) => (
-        <div key={gi}>
-          <h2 className="docs-group__title">{group.title}</h2>
-          {group.items.map(([path, desc], i) => (
-            <div className="docs-item" key={i}>
-              <span className="docs-item__path">{path}</span>
-              <span className="docs-item__desc">{desc}</span>
-            </div>
-          ))}
-        </div>
-      ))}
+      <div className="docs-list">
+        {DOC_ORDER.map((slug) => {
+          const doc = items.find((d) => d.slug === slug);
+          if (!doc) return null;
+          return (
+            <Link
+              key={slug}
+              to={`/docs/${lang}/${slug}`}
+              className="docs-item docs-item--link"
+            >
+              <span className="docs-item__path">{slug}.md</span>
+              <span className="docs-item__desc">
+                {t(`docs.items.${slug}`)}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
 
       <p className="note" style={{ marginTop: "32px" }}>
         {t("docs.note")}
       </p>
+
+      <a
+        href={t("common.repoUrl")}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn btn--ghost"
+      >
+        {t("docs.githubLabel")}
+      </a>
     </div>
   );
 }

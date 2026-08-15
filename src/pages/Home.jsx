@@ -24,6 +24,14 @@ export default function Home() {
             <Link to="/installation" className="btn btn--ghost">
               {t("home.hero.ctaInstall")}
             </Link>
+            <a
+              href={t("common.repoUrl")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn--ghost"
+            >
+              {t("common.github")}
+            </a>
           </div>
         </div>
       </section>

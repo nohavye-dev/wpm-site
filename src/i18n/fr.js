@@ -12,7 +12,8 @@ export default {
     phaseBadge: "En phase d'essais",
     analogy: "Analogie",
     backHome: "Retour à l'accueil",
-    repoPath: "dépôt non publié — chemins relatifs au dépôt local",
+    github: "GitHub",
+    repoUrl: "https://github.com/nohavye-dev/wpm-system",
   },
 
   home: {
@@ -458,46 +459,19 @@ export default {
 
   docs: {
     title: "Documentation",
-    intro: "Toute la documentation du projet, organisée par sujet.",
-    groups: [
-      {
-        title: "Racine",
-        items: [
-          ["README.md", "Présentation générale du projet"],
-          ["install.sh", "Installation globale en une commande"],
-        ],
-      },
-      {
-        title: "docs/",
-        items: [
-          ["docs/concepts.md", "Concepts et fonctionnement, vulgarisés"],
-          ["docs/setup.md", "Installation, activation, désinstallation"],
-          ["docs/workflows.md", "Les workflows learn, map, bootstrap, audit, patterns"],
-          ["docs/agent-behavior.md", "Ce que l'agent doit faire (référence)"],
-          ["docs/configuration.md", "Référence wpm.config.json"],
-          ["docs/internal/", "Notes de conception internes (validation, calibration)"],
-        ],
-      },
-      {
-        title: "Serveur",
-        items: [
-          ["wpm-mcp-server/README.md", "Le serveur, côté technique"],
-          ["wpm-mcp-server/wpm.config.example.json", "Exemple de configuration complète"],
-        ],
-      },
-      {
-        title: "Plugin OpenCode",
-        items: [
-          ["wpm-opencode-plugin/README.md", "Le plugin OpenCode"],
-          ["wpm-opencode-plugin/plugin.ts", "Le code source du plugin"],
-        ],
-      },
-      {
-        title: "CLI",
-        items: [["scripts/wpm", "La commande wpm"]],
-      },
-    ],
-    note: "Le dépôt n'est pas publié pour l'instant : les chemins ci-dessus sont relatifs à /home/noha/Projets/ai-tools/wpm-system.",
+    intro: "La documentation complète de WPM, disponible en français et en anglais.",
+    items: {
+      concepts: "Concepts et fonctionnement, vulgarisés",
+      setup: "Installation, activation, désinstallation",
+      workflows: "Les workflows learn, map, bootstrap, audit, patterns",
+      "agent-behavior": "Ce que l'agent doit faire (référence)",
+      configuration: "Référence wpm.config.json",
+    },
+    note: "Chaque page existe en français (FR) et en anglais (EN) : le bouton FR/EN en haut d'une page bascule entre les deux.",
+    docNote: "Ces docs sont aussi dans le dépôt GitHub",
+    githubLabel: "wpm-system sur GitHub",
+    notFound: "Cette page de documentation n'existe pas.",
+    backToDocs: "Retour à la documentation",
   },
 
   footer: {

@@ -6,6 +6,7 @@ import Features from "./pages/Features.jsx";
 import Installation from "./pages/Installation.jsx";
 import Architecture from "./pages/Architecture.jsx";
 import Docs from "./pages/Docs.jsx";
+import DocPage from "./pages/DocPage.jsx";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/installation" element={<Installation />} />
         <Route path="/architecture" element={<Architecture />} />
         <Route path="/docs" element={<Docs />} />
+        <Route path="/docs/:lang/:slug" element={<DocPage />} />
       </Routes>
     </Layout>
   );

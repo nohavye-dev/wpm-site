@@ -17,6 +17,9 @@ export default function Footer() {
           <Link to="/features">{t("nav.features")}</Link>
           <Link to="/installation">{t("nav.installation")}</Link>
           <Link to="/docs">{t("nav.docs")}</Link>
+          <a href={t("common.repoUrl")} target="_blank" rel="noopener noreferrer">
+            {t("common.github")}
+          </a>
         </div>
         <span className="footer__badge">{t("common.phaseBadge")}</span>
       </div>
