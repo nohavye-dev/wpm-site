@@ -31,7 +31,7 @@ export default function DocPage() {
   }
 
   return (
-    <div className="page container">
+    <div className="page container doc-page">
       <nav className="doc-crumbs">
         <Link to="/docs">{t("nav.docs")}</Link>
         <span className="doc-crumbs__sep">/</span>

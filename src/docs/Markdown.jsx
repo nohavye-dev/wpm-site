@@ -31,6 +31,11 @@ export default function Markdown({ content }) {
         remarkPlugins={[remarkGfm]}
         components={{
           a: (props) => <DocLink {...props} />,
+          table: (props) => (
+            <div className="md-table-wrap">
+              <table>{props.children}</table>
+            </div>
+          ),
         }}
       >
         {content}

@@ -27,6 +27,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -36,6 +37,7 @@ body {
   color: var(--text);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
 }
 
 a {
@@ -650,6 +652,7 @@ code {
   display: flex;
   gap: 16px;
   font-size: 0.9rem;
+  flex-wrap: wrap;
 }
 
 .footer__links a { color: var(--text-dim); }
@@ -721,6 +724,10 @@ code {
 .doc-crumbs__sep {
   margin: 0 8px;
   color: var(--text-faint);
+}
+
+.doc-page {
+  max-width: 800px;
 }
 
 /* ── Markdown ──────────────────────────────────────── */
@@ -799,10 +806,14 @@ code {
   color: #d8ccff;
 }
 
+.markdown .md-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 16px;
+}
+
 .markdown table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0 0 16px;
   font-size: 0.94rem;
 }
 
