@@ -1,90 +1,107 @@
-# Installation — configurer WPM sur un projet
+# Installation et activation
 
-WPM est un **serveur MCP** (Model Context Protocol). Pour l'utiliser, il
-faut donc un client MCP : **OpenCode**, la plupart des clients MCP de
-LLM, ou les outils de test décrits plus bas.
-
----
-
-## 1. Prérequis
-
-- **Python 3.11+** et `pip`.
-- **OpenCode ≥ 1.18** (ou tout client MCP supportant un serveur local),
-  pour une utilisation en assistant IA.
-- **Git** pour le script d'installation.
-- Les **11 outils MCP** fournis par le serveur `wpm` (voir
-  [`agent-behavior.md`](agent-behavior.md) pour la liste complète).
+WPM s'installe une fois (globalement), puis s'active projet par projet. Le
+plugin OpenCode est installé **par défaut** et enregistre le serveur MCP à
+votre place : aucune configuration OpenCode manuelle n'est nécessaire.
 
 ---
 
-## 2. Installation via le script
+## 1. Installation globale
+
+Depuis la racine du dépôt :
 
 ```bash
-mkdir -p "$HOME/.local/share/wpm" && \
-git clone https://github.com/nohavye-dev/wpm-system.git "$HOME/.local/share/wpm/wpm-system"
+./install.sh
 ```
 
-Ce clone contient le package (script `install.sh`, source du serveur,
-`wpm.config.example.json`).
+Ce que fait `install.sh` :
 
-**Activation du MCP** : le serveur MCP est configuré dans le fichier de
-config de votre client. Pour OpenCode, ajoutez ceci à `opencode.json` :
+1. crée un environnement Python dédié (`~/.local/share/wpm-system/venv`) et
+   y installe le serveur ;
+2. pré-télécharge le modèle d'embedding (~80 MB) pour un premier démarrage
+   hors-ligne ;
+3. installe la commande `wpm` (`~/.local/bin/wpm`) ;
+4. installe le plugin OpenCode dans `~/.config/opencode/plugins/` (global).
 
-```json
-{
-  "mcp": {
-    "wpm": {
-      "type": "local",
-      "command": ["bash", "-c", "source \"$HOME/.local/share/wpm/wpm-system/wpm-mcp-server/.venv/bin/activate\" && \"$HOME/.local/share/wpm/wpm-system/wpm-mcp-server/wpm\" "],
-      "environment": {
-        "WPM_ROOT": "<chemin de votre projet>",
-        "WPM_ALPHA": "0.8"
-      }
-    }
-  }
-}
+> Les chemins honorent `$XDG_DATA_HOME` / `$XDG_BIN_HOME` /
+> `$XDG_CONFIG_HOME` s'ils sont définis.
+
+---
+
+## 2. Activer un projet
+
+Depuis la racine du projet concerné :
+
+```bash
+wpm enable
 ```
 
-> `WPM_ROOT` doit pointer vers le **projet** qui bénéficie de la mémoire.
-> Le `.venv` est créé par `install.sh` au premier lancement.
+`wpm enable` écrit `wpm.config.json` à la racine du projet (confirmation ;
+`--yes` pour la sauter) :
+
+- `db_path` par défaut `.wpm/wpm.db` s'il est absent (les clés existantes
+  sont préservées) ;
+- crée le dossier de la base et l'ajoute au `.gitignore` ;
+- crée la base de données ;
+- refuse un `db_path` qui sort du projet (chemin absolu externe, ou relatif
+  avec `..`).
+
+Pour un dossier de base personnalisé :
+
+```bash
+wpm enable .memory   # → db_path ".memory/wpm.db"
+```
+
+> Le `db_dir` ne sert que lors d'une **première** activation : si un
+> `db_path` existe déjà, il est préservé.
 
 ---
 
 ## 3. Ce qui se passe ensuite
 
-- Le serveur lance un sous-processus `bootstrap`, qui :
-  - crée le **schéma SQLite** de la mémoire (`wpm_memory.db` dans
-    `<projet>/.wpm/`) ;
-  - indexe les **règles du projet** (auto-mémorisées par l'agent,
-    `rules/wpm-rules.md`).
-- À la **première session** sur un projet avec WPM actif, l'agent
-  mémorise automatiquement la structure et les conventions du projet
-  (`map` automatique, voir [`workflows.md`](workflows.md)).
+Au prochain démarrage d'OpenCode sur ce projet, le plugin détecte le
+`wpm.config.json` et :
+
+1. enregistre le serveur MCP `wpm` (outils `wpm_store_entry`,
+   `wpm_query_context`, …) ;
+2. accorde la permission `wpm_*` pour que l'agent puisse écrire la mémoire,
+   même en mode plan.
+
+**Redémarrez OpenCode** après `wpm enable` (ou `wpm disable`) : la
+configuration n'est lue qu'une fois au démarrage.
 
 ---
 
-## 4. Options de configuration
+## 4. Vérifier que ça marche
 
-| Variable | Rôle | Défaut |
-|---|---|---|
-| `WPM_ROOT` | Répertoire du projet qui porte la mémoire | répertoire courant |
-| `WPM_ALPHA` | Contrôle le poids des expériences récentes | `0.8` |
-
-Les vitesses de décroissance et les seuils de validation se règlent dans
-`wpm.config.json` (voir [`configuration.md`](configuration.md)). Un fichier
-`wpm.config.example.json` est fourni dans `wpm-mcp-server/`.
-
----
-
-## 5. Test rapide
+- Dans OpenCode, l'agent doit voir les outils `wpm_*`.
+- Depuis le terminal, dans le projet activé :
 
 ```bash
-# Depuis wpm-system/wpm-mcp-server/
-source .venv/bin/activate
-wpm list-entries      # doit afficher « Aucune entrée » (base vide)
-wpm store-entry --content "test" --type insight --source tool_execution
-wpm list-entries      # doit afficher 1 entrée
+wpm search "nom d'un sujet"      # interroge la mémoire
 ```
 
-Pour le détail des commandes et des flags, voir le
-[README du serveur](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md).
+Sans activation, les outils répondent « wpm is not activated in this
+project ».
+
+---
+
+## 5. Désactiver / désinstaller
+
+```bash
+wpm disable      # retire wpm.config.json (les données sont conservées)
+wpm uninstall    # suppression globale complète (venv, binaire, plugin) ; --force pour sauter la confirmation
+./install.sh uninstall   # équivalent, depuis la racine du dépôt
+```
+
+---
+
+## Pour les curieux — comment le plugin enregistre le serveur
+
+C'est le hook `config` du plugin qui, au chargement, injecte dans la
+configuration d'OpenCode une entrée `mcp.wpm` pointant vers
+`python -m wpm_mcp_server` avec `WPM_CONFIG_PATH` positionné sur le
+`wpm.config.json` du projet, plus la permission `wpm_*`. Vous n'avez donc
+**rien à déclarer** dans `opencode.json`. Pour brancher le serveur à la main
+(hors OpenCode, ou pour comprendre), voir
+[`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md).

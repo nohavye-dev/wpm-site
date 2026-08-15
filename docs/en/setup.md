@@ -1,90 +1,106 @@
-# Setup — configuring WPM on a project
+# Installation and activation
 
-WPM is an **MCP server** (Model Context Protocol). To use it you need an
-MCP client: **OpenCode**, most LLM MCP clients, or the test tools described
-below.
-
----
-
-## 1. Prerequisites
-
-- **Python 3.11+** and `pip`.
-- **OpenCode ≥ 1.18** (or any MCP client supporting a local server), for
-  use as an AI assistant.
-- **Git** for the install script.
-- The **11 MCP tools** provided by the `wpm` server (see
-  [`agent-behavior.md`](agent-behavior.md) for the full list).
+WPM is installed once (globally), then activated project by project. The
+OpenCode plugin is installed **by default** and registers the MCP server for
+you: no manual OpenCode configuration is needed.
 
 ---
 
-## 2. Install via the script
+## 1. Global installation
+
+From the repository root:
 
 ```bash
-mkdir -p "$HOME/.local/share/wpm" && \
-git clone https://github.com/nohavye-dev/wpm-system.git "$HOME/.local/share/wpm/wpm-system"
+./install.sh
 ```
 
-This clone contains the package (the `install.sh` script, the server
-source, `wpm.config.example.json`).
+What `install.sh` does:
 
-**MCP activation**: the MCP server is configured in your client's config
-file. For OpenCode, add this to `opencode.json`:
+1. creates a dedicated Python environment (`~/.local/share/wpm-system/venv`) and
+   installs the server in it;
+2. pre-downloads the embedding model (~80 MB) for a first start
+   offline;
+3. installs the `wpm` command (`~/.local/bin/wpm`);
+4. installs the OpenCode plugin in `~/.config/opencode/plugins/` (global).
 
-```json
-{
-  "mcp": {
-    "wpm": {
-      "type": "local",
-      "command": ["bash", "-c", "source \"$HOME/.local/share/wpm/wpm-system/wpm-mcp-server/.venv/bin/activate\" && \"$HOME/.local/share/wpm/wpm-system/wpm-mcp-server/wpm\" "],
-      "environment": {
-        "WPM_ROOT": "<your project path>",
-        "WPM_ALPHA": "0.8"
-      }
-    }
-  }
-}
+> The paths honor `$XDG_DATA_HOME` / `$XDG_BIN_HOME` /
+> `$XDG_CONFIG_HOME` if they are defined.
+
+---
+
+## 2. Activating a project
+
+From the root of the project concerned:
+
+```bash
+wpm enable
 ```
 
-> `WPM_ROOT` must point to the **project** that benefits from the memory.
-> The `.venv` is created by `install.sh` on first run.
+`wpm enable` writes `wpm.config.json` at the root of the project
+(confirmation; `--yes` to skip it):
+
+- default `db_path` `.wpm/wpm.db` if absent (existing keys are preserved);
+- creates the database folder and adds it to `.gitignore`;
+- creates the database;
+- refuses a `db_path` that leaves the project (external absolute path, or
+  relative with `..`).
+
+For a custom database folder:
+
+```bash
+wpm enable .memory   # → db_path ".memory/wpm.db"
+```
+
+> The `db_dir` only matters on a **first** activation: if a `db_path` already
+> exists, it is preserved.
 
 ---
 
 ## 3. What happens next
 
-- The server launches a `bootstrap` subprocess, which:
-  - creates the **SQLite schema** of the memory (`wpm_memory.db` in
-    `<project>/.wpm/`);
-  - indexes the **project rules** (auto-memorized by the agent,
-    `rules/wpm-rules.md`).
-- On the **first session** on a project with WPM active, the agent
-  automatically memorizes the project structure and conventions
-  (automatic `map`, see [`workflows.md`](workflows.md)).
+At the next OpenCode start on this project, the plugin detects the
+`wpm.config.json` and:
+
+1. registers the `wpm` MCP server (tools `wpm_store_entry`,
+   `wpm_query_context`, …);
+2. grants the `wpm_*` permission so the agent can write the memory, even in
+   plan mode.
+
+**Restart OpenCode** after `wpm enable` (or `wpm disable`): the
+configuration is only read once at startup.
 
 ---
 
-## 4. Configuration options
+## 4. Verifying it works
 
-| Variable | Role | Default |
-|---|---|---|
-| `WPM_ROOT` | Directory of the project carrying the memory | current directory |
-| `WPM_ALPHA` | Controls the weight of recent experiences | `0.8` |
-
-Decay rates and validation thresholds are set in `wpm.config.json` (see
-[`configuration.md`](configuration.md)). A `wpm.config.example.json` file
-is provided in `wpm-mcp-server/`.
-
----
-
-## 5. Quick test
+- In OpenCode, the agent must see the `wpm_*` tools.
+- From the terminal, in the activated project:
 
 ```bash
-# From wpm-system/wpm-mcp-server/
-source .venv/bin/activate
-wpm list-entries      # should show "No entries" (empty store)
-wpm store-entry --content "test" --type insight --source tool_execution
-wpm list-entries      # should show 1 entry
+wpm search "name of a topic"      # queries the memory
 ```
 
-For the details of commands and flags, see the
-[server README](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md).
+Without activation, the tools reply "wpm is not activated in this
+project".
+
+---
+
+## 5. Disabling / uninstalling
+
+```bash
+wpm disable      # removes wpm.config.json (data is kept)
+wpm uninstall    # complete global removal (venv, binary, plugin); --force to skip the confirmation
+./install.sh uninstall   # equivalent, from the repository root
+```
+
+---
+
+## For the curious — how the plugin registers the server
+
+It is the plugin's `config` hook that, at load time, injects into the
+OpenCode configuration an `mcp.wpm` entry pointing to
+`python -m wpm_mcp_server` with `WPM_CONFIG_PATH` set to the project's
+`wpm.config.json`, plus the `wpm_*` permission. So you have **nothing to
+declare** in `opencode.json`. To wire the server manually (outside OpenCode,
+or to understand), see
+[`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md).

@@ -1,105 +1,76 @@
-# Workflows — the 5 WPM commands
+# Workflows — `learn`, `map`, `bootstrap`, `audit`, `patterns`
 
-WPM exposes 5 workflows as commands: `learn`, `map`, `bootstrap`, `audit`,
-`patterns`. They can be invoked directly (CLI) or by the agent through the
-corresponding MCP tools.
+Five ready-to-use workflows to feed or inspect the project memory. In
+OpenCode, these are slash commands (e.g. `/wpm:learn:mcp`); they only run on
+explicit invocation.
 
-Daily usage is described in [`agent-behavior.md`](agent-behavior.md); this
-document describes **what each workflow does**.
+## Two ways of memorizing, not to be confused
 
----
+- **Incremental memorization (automatic)** — while working, the agent records
+  every durable fact as soon as it encounters it. This is the default
+  behavior, described in [`agent-behavior.md`](agent-behavior.md). The
+  workflows do not replace it.
+- **Controlled ingestion (manual)** — `learn`, `map` and `bootstrap` are for
+  bringing in **in bulk** documents, a code mapping, or an initial seeding.
+  Not for one-off facts of a task.
 
-## 1. `wpm learn`
+## Common guardrail
 
-Purpose: **memorize a durable fact** discovered during work.
-
-In one sentence: *"we just discovered this, let's write it down, with its
-source and its level of certainty."*
-
-| Point | Detail |
-|---|---|
-| Entry type | `doc`, `archi_decision`, `insight`, `convention`, `bug_pattern`, `execution_result` |
-| Source | `official_doc`, `observed_code`, `tool_execution`, `agent_inference` |
-| Effect | creates the entry with an **initial confidence** based on the source (high for a verified fact, low for a hypothesis) |
-| Variant | `wpm enable` activates automatic write-as-you-go memorization |
-
-This is the **most used** command: it is what feeds the memory.
+- If `wpm.config.json` does not exist, the memory is not activated: run
+  `wpm enable` at the project root then restart OpenCode.
+- If no path is provided to `learn` or `map`, the prompt only displays its
+  usage and guesses nothing.
 
 ---
 
-## 2. `wpm map`
+## `learn <paths>`
 
-Purpose: **inventory the project** — its structure, conventions, rules.
+Ingests one or more markdown documents, section by section.
 
-In one sentence: *"on the first pass over a project, we take notes on how
-it is organized."*
+- Each section (`##`/`###`) becomes a candidate entry.
+- **Deduplication**: before writing, the workflow checks whether the fact
+  already exists; if so, it re-validates instead of creating a duplicate.
+- Content **translated into English**, rephrased concisely.
+- Type inferred (`doc`, `archi_decision`, `convention`, `bug_pattern`),
+  source `official_doc`.
+- Renders a **summary**: per file, sections stored / deduplicated / ignored.
 
-| Point | Detail |
-|---|---|
-| Entry type | `doc`, `insight`, `convention` |
-| Source | `observed_code` (default) |
-| Effect | memorizes the structure (`src/`, naming conventions, architecture) |
-| Auto | run automatically on the first session on a project |
+## `map [scopes]`
 
----
+Maps the architecture and conventions of the codebase.
 
-## 3. `wpm bootstrap`
+- **Not a file-by-file index**: only a few structuring facts, always anchored
+  in code that was actually read.
+- Types: `archi_decision`, `convention`, `bug_pattern`; source
+  `observed_code`.
+- Same deduplication as `learn`, with a final summary (stored / re-validated /
+  discarded for lack of confidence).
 
-Purpose: **initialize the memory store** and the project rules.
+## `bootstrap`
 
-In one sentence: *"we prepare the ground the first time."*
+Seeds the memory from the existing artifacts (README, docs, lint configs,
+CI/CD, folder structure) — in a single pass. To run once per project, after
+`wpm enable`, then incremental memorization takes over.
 
-| Point | Detail |
-|---|---|
-| Schema | creates `wpm_memory.db` in `<project>/.wpm/` (`memory` table…) |
-| Rules | indexes `rules/wpm-rules.md` (auto-generated) |
-| Silent | runs as a subprocess, no output |
+## `audit`
 
-It is launched automatically by the server at startup; no need to call it
-by hand, except to debug.
+**Read-only** dashboard of the memory health: total per type, confidence
+distribution, entries never validated, active contradictions, the 5 weakest
+entries, recent activity. Ends with a verdict ("Memory is healthy" / "N
+issues need attention") and may suggest actions (`pin_entry`,
+`deprecate_entry`, `restore_entry`) without executing them.
 
----
+## `patterns [type]`
 
-## 4. `wpm audit`
-
-Purpose: **examine the state of the memory**.
-
-In one sentence: *"what do we have in memory, is it reliable, does it
-contradict anything else?"*
-
-| Point | Detail |
-|---|---|
-| Statistics | number of entries by type, confidence distribution, entries never validated, active contradictions, 5 least reliable entries |
-| Diagnostics | lists low-confidence entries (to validate or clean up) |
-| Usage | run regularly to keep the memory healthy |
-
----
-
-## 5. `wpm patterns`
-
-Purpose: **detect recurring patterns** in the memory.
-
-In one sentence: *"are there patterns emerging from the notes that we had
-not noticed?"*
-
-| Point | Detail |
-|---|---|
-| Analysis | highlights regularities among linked entries |
-| Usage | useful at the end of work or a sprint to capitalize |
-| Status | experimental workflow, results to interpret |
+Analyzes the memory to detect recurring patterns and proposes improvements: a
+missing convention, an implicit decision, a contradiction to resolve. The
+proposed actions are **executed automatically** (for example: 4+ `bug_pattern`
+of the same cause → create a `convention`; a convention validated 3+ times →
+`pin_entry`). If nothing emerges, the negative result is reported.
 
 ---
 
-## Summary
-
-| Command | Purpose | Frequency |
-|---|---|---|
-| `learn` | memorize a fact | as you go |
-| `map` | inventory the project | first session + new things |
-| `bootstrap` | initialize the store | automatic |
-| `audit` | diagnose the memory | regularly |
-| `patterns` | detect regularities | occasional |
-
-Memorization of these commands is **automatic**: when the agent runs them,
-the useful results are persisted in memory (via `record_execution` for
-verification commands, via `store_entry` for discovered facts).
+> After an ingestion, read the summary: "discarded" facts indicate a
+> deliberate filtering (too vague, too uncertain), not a failure. You can then
+> reinforce the entries over the sessions (`validate_entry`,
+> `contradict_entry`).

@@ -1,122 +1,176 @@
-# Comportement de l'agent — ce que fait l'IA avec WPM
+# Comportement de l'agent — comment utiliser la mémoire
 
-Ce document décrit le **comportement attendu de l'agent IA** quand WPM est
-actif : les réflexes à avoir, les invariants à respecter, et le rôle des
-règles projet. Pour la mécanique des commandes, voir
-[`workflows.md`](workflows.md) ; pour le réglage des paramètres,
-[`configuration.md`](configuration.md).
+Ce document décrit **ce que l'agent doit faire** pour tirer le meilleur
+parti de la mémoire une fois le projet activé. Ce n'est pas de la technique
+de serveur (voir [`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md)),
+c'est le mode d'emploi comportemental.
 
-> **Rappel** : ce comportement est **imposé par le prompt système** de
-> l'agent, pas juste suggéré. L'agent ne « pense pas que c'est une bonne
-> idée » : il le fait, parce que c'est sa procédure.
-
----
-
-## Les 3 règles d'or (priorité absolue)
-
-1. **MEMORY FIRST.** Avant de lire un fichier ou de lancer une recherche,
-   l'agent appelle `query_context` sur le sujet. La réponse est peut-être
-   déjà en mémoire.
-2. **WRITE AS YOU GO.** Dès qu'un fait durable émerge (décision, convention,
-   résultat de test, bug compris), l'agent appelle `store_entry`
-   **immédiatement**. Ne pas différer la persistance : les faits non
-   persistés sont perdus à la compaction du contexte.
-3. **PROOF BEFORE VALIDATION.** L'agent ne valide une entrée qu'avec une
-   **preuve externe, vérifiable** (un log de test, un chemin de fichier,
-   une autre entrée). Jamais de « je pense que c'est vrai » pour faire
-   monter un score.
+- **L'essentiel** (ci-dessous) est injecté au début de chaque session et
+  rappelé par le plugin à chaque tour.
+- **La référence détaillée** (plus bas) précise chaque règle ; l'agent n'a
+  pas à la mémoriser — l'essentiel en est relu au bon moment.
 
 ---
 
-## Les invariants
+## L'essentiel
 
-### Ne jamais deviner la fiabilité
+Trois **règles d'or**, par ordre de priorité :
 
-La confiance est **décidée par le système** (source de l'entrée, preuves,
-temps), pas par l'humeur de l'agent. L'agent n'augmente pas son propre
-score : il apporte des preuves, et le modèle fait le reste.
+1. **MEMORY FIRST** — avant de lire un fichier ou de chercher dans le code,
+   interroger d'abord la mémoire (`query_context`) : la réponse y est
+   peut-être déjà.
+2. **WRITE AS YOU GO** — dès qu'un fait durable émerge (décision,
+   convention, résultat de test, bug compris), l'enregistrer immédiatement
+   (`store_entry`). Ne jamais remettre à la fin.
+3. **PROOF BEFORE VALIDATION** — valider ou contredire uniquement avec une
+   preuve externe et vérifiable, jamais avec du raisonnement seul.
 
-### Ne jamais supprimer
+**Séquence de démarrage** : lire `wpm://project-rules` → `query_context`
+sur le sujet courant → `store_entry` dès fait durable → `validate_entry`
+avec preuve une fois confirmé.
 
-Même quand une entrée est contredite, l'agent **ne la supprime pas**. Il
-enregistre une contradiction (avec sa preuve), qui fait chuter le score de
-l'entrée fautive tout en gardant la trace.
+**Politiques transversales** :
 
-### Relire la mémoire avant de répondre
+- **Fiabilité avant exhaustivité** : une entrée fausse est pire qu'une
+  entrée absente ; mieux vaut une mémoire pauvre qu'une mémoire polluée.
+- **Écrire à tout moment** : les outils d'écriture s'utilisent en mode plan,
+  build ou n'importe quel mode. Le mode plan n'est pas une excuse pour
+  différer. Si le host bloque, réessayer ou basculer en mode build.
 
-Au début de chaque réponse substantielle, l'agent interroge `query_context`
-sur le sujet du moment. Il ne répond pas à partir du seul raisonnement.
-
-### Vérifier les conflits
-
-Avant de se fier à une correspondance directe de `query_context`, l'agent
-regarde la section `conflicts` (entrées avec un lien « contredit » actif).
-Une entrée avec un conflit actif ne doit pas être considérée comme fiable
-sans preuve supplémentaire.
-
----
-
-## Le cycle de travail
-
-```
-              ┌──────────────────────────────────────────────┐
-              │  1. MEMORY FIRST                             │
-              │  query_context(sujet) → y a-t-il déjà        │
-              │  une entrée fiable sur ce sujet ?            │
-              └──────────────┬───────────────────────────────┘
-                             ▼
-              ┌──────────────────────────────────────────────┐
-              │  2. WRITE AS YOU GO                          │
-              │  fait durable ? → store_entry immédiat,      │
-              │  avec source (doc / code / exécution /       │
-              │  inference)                                  │
-              └──────────────┬───────────────────────────────┘
-                             ▼
-              ┌──────────────────────────────────────────────┐
-              │  3. PROOF BEFORE VALIDATION                  │
-              │  entrée confirmée par une preuve externe ?   │
-              │  → validate_entry(preuve, evidence_ref)      │
-              │  contredite ? → contradict_entry(preuve)     │
-              └──────────────────────────────────────────────┘
-```
+> Le détail de chaque règle (choix du type, de la source, hiérarchie des
+> preuves…) vit dans la **description de chaque outil**, relue à chaque
+> appel — donc appliqué sans lire ce document.
 
 ---
 
-## Les liens entre entrées
+## Référence détaillée
 
-Quand deux entrées sont liées (une décision d'architecture **dépend de**
-une convention, un insight **affine** un autre), l'agent appelle
-`link_entries(source, cible, relation)` avec l'une des relations :
-`related`, `contradicts`, `depends_on`, `refines`. Le lien « contredit »
-est **réservé** aux vraies contradictions (jamais pour exprimer un doute).
+### 1. Langue du contenu
 
----
+Tout `content` stocké doit être **en anglais** (cohérence des embeddings).
+Traduire avant de stocker. En revanche, les réponses et rapports de l'agent
+restent dans la langue de l'utilisateur — sauf si `response_language` est
+fixé dans la config (voir [`configuration.md`](configuration.md)).
 
-## Les règles projet : la mémoire « projet » vs la mémoire « session »
+### 2. Quand écrire
 
-- La mémoire **projet** est persistante et partagée entre sessions : c'est
-  celle que WPM stocke et pondère.
-- Les règles projet (`rules/wpm-rules.md`) sont **recomposées** par le
-  système à partir des entrées les plus fiables ; l'agent les lit en début
-  de session pour respecter les conventions du projet.
+Écrire **au fil de l'eau** : dès qu'un fait durable existe, l'enregistrer
+sans attendre la fin de la tâche (un fait non écrit peut disparaître à la
+compaction). Mais **ne pas écrire n'importe quoi** : se demander « ce fait
+sera-t-il encore vrai et utile dans plusieurs semaines ? ». Un détail
+transitoire, une hypothèse non vérifiée, une évidence déjà lisible dans le
+code : ne pas créer d'entrée.
 
----
+`store_entry` retourne un champ `potential_contradictions` : des entrées très
+similaires déjà présentes. Haute similarité ne veut pas dire contradiction —
+ce peut être un doublon (→ `validate_entry` sur l'existante) ou une vraie
+contradiction (→ `contradict_entry`). **Comparer les contenus** avant
+d'agir.
 
-## Pièges à éviter
+### 3. Déduplication avant écriture
 
-| Piège | Comportement correct |
+Avant tout `store_entry`, faire un `query_context` rapide. Si un fait très
+proche existe déjà : **ne pas créer de doublon**, appeler `validate_entry`
+sur l'existante. Un doublon fragmente la confiance sur deux entrées.
+
+### 4. Choisir le bon `type`
+
+| Type | Quand l'utiliser |
 |---|---|
-| Valider une entrée « pour la booster » | Fournir une preuve externe ou ne rien faire |
-| Supprimer une entrée fausse | Enregistrer une contradiction avec preuve |
-| Répondre sans avoir interrogé la mémoire | Toujours `query_context` sur le sujet du moment |
-| Écrire tous les faits à la fin de session | `store_entry` dès qu'un fait durable émerge |
-| Confondre `agent_inference` et fait vérifié | Noter la vraie source, même si elle est peu flatteuse |
+| `doc` | Contenu explicatif/référence issu d'une documentation |
+| `archi_decision` | Choix structurant, observé dans le code ou décidé |
+| `convention` | Règle de nommage/style/process suivie de façon cohérente |
+| `insight` | Compréhension découverte, durable des semaines/mois — ni décision, ni règle, ni recopié d'une doc |
+| `bug_pattern` | Problème connu et sa cause, avec preuve — jamais une supposition |
+| `execution_result` | Résultat d'un test/build/lint (via `record_execution`) — éphémère |
 
----
+Ne pas forcer un fait dans un type inadapté par habitude.
 
-## En résumé
+### 5. Choisir le bon `source`
 
-WPM ne demande pas à l'agent d'être **plus intelligent**, juste plus
-**rigoureux et discipliné** : interroger avant de répondre, mémoriser au
-fil de l'eau, prouver avant de valider. C'est cette discipline, répétée à
-chaque session, qui rend la mémoire du projet fiable dans le temps.
+La `source` fixe la confiance de départ. Ne jamais sur-déclarer :
+
+| Source | Quand |
+|---|---|
+| `official_doc` | Documentation réelle, lue et citée |
+| `observed_code` | Constaté directement dans le code |
+| `tool_execution` | Résultat de commande/test réellement exécuté |
+| `agent_inference` | Déduction sans preuve directe — confiance de départ basse |
+
+Une hypothèse utilise `agent_inference`, même si elle semble solide.
+
+### 6. Validation — hiérarchie des preuves
+
+`validate_entry` / `contradict_entry` exigent un `evidence_type` et un
+`evidence_ref` pointant vers quelque chose de **vérifiable**.
+
+| Preuve | Force | Effet |
+|---|---|---|
+| `execution_verified` | forte | test/build/commande exécutée, résultat constaté |
+| `cross_reference` | moyenne | confirmation indépendante par une autre source |
+| `reuse_without_failure` | faible | réutilisée sans échec — signal faible |
+| `agent_reasoning` | nulle | **journalisé, ne fait jamais bouger le score** |
+
+Ne jamais utiliser `agent_reasoning` pour faire monter la confiance. Ne pas
+re-valider en boucle pour gonfler un score (dédupliqué par session de toute
+façon).
+
+### 7. Contradiction — jamais de suppression
+
+Si un fait contredit une entrée existante : `contradict_entry` avec preuve
+externe, **jamais** supprimer ni écraser. Le score de l'entrée contredite
+chute plus vite qu'une confirmation ne le ferait monter (voulu).
+
+### 8. Lecture — traiter les résultats différemment
+
+- `direct_matches` — correspondance directe, la plus fiable.
+- `related_context` — rappel associatif (1 saut de graphe), moins fiable, à
+  mentionner avec prudence.
+- `conflicts` — entrées en contradiction active. **Toujours vérifier avant
+  de s'appuyer sur un `direct_match`.** Ne jamais présenter un fait contesté
+  comme acquis.
+
+### 9. Liens explicites
+
+`link_entries` seulement pour les relations que la similarité ne devine pas :
+`depends_on`, `refines` (`contradicts` est géré par `contradict_entry`). Ne
+pas sur-lier.
+
+### 10. Discipline de session
+
+- `session_id` stable pour toute une tâche (sinon la déduplication
+  anti-boucle perd son effet).
+- En fin de tâche, faire une dernière passe : reste-t-il un fait non
+  persisté ? L'écrire avant de considérer la tâche terminée.
+
+### 11. Workflows dédiés
+
+Les workflows `learn`/`map`/`bootstrap`/`audit`/`patterns` sont l'ingestion
+**contrôlée** ; ils ne remplacent pas la mémorisation incrémentale. Voir
+[`workflows.md`](workflows.md).
+
+### 12. Cycle de vie : pin, deprecate, restore
+
+- **`pin_entry`** — figer la confiance (plus de decay). Pour les décisions
+  fondatrices, conventions imposées, entrées validées 3+ fois (>0.8). Jamais
+  un `insight`/`bug_pattern`/`execution_result` ni une entrée contestée.
+- **`deprecate_entry`** — exclure une entrée obsolète (contradiction
+  tranchée, code disparu, bug corrigé). Réversible.
+- **`restore_entry`** — remettre une entrée en statut actif (dépréciation
+  prématurée, épingle plus justifiée).
+
+### 13. Ce qu'il ne faut jamais faire
+
+- Stocker dans une autre langue que l'anglais.
+- Créer une entrée sans vérifier qu'elle n'existe pas déjà.
+- Valider avec `agent_reasoning` pour gonfler un score.
+- Supprimer ou écraser une entrée contredite.
+- Présenter un `direct_match` comme fiable sans vérifier `conflicts`.
+- Différer l'écriture d'un fait important « pour plus tard ».
+- Sur-lier des entrées sans relation réelle.
+- Épingler un `insight`/`bug_pattern`/`execution_result` ou une entrée non
+  validée.
+- Déprécier sans être certain de l'obsolescence.
+- Ignorer les problèmes signalés par `audit`.
+- Différer la persistance parce qu'on est en mode plan — si l'écriture est
+  bloquée, basculer en mode build.

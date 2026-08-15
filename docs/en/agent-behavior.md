@@ -1,120 +1,172 @@
-# Agent behavior — what the AI does with WPM
+# Agent behavior — how to use the memory
 
-This document describes the **expected behavior of the AI agent** when WPM
-is active: the reflexes to have, the invariants to respect, and the role of
-project rules. For the mechanics of the commands, see
-[`workflows.md`](workflows.md); for tuning the parameters,
-[`configuration.md`](configuration.md).
+This document describes **what the agent must do** to get the best out of the
+memory once the project is activated. This is not server technology (see
+[`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md)),
+it is the behavioral handbook.
 
-> **Reminder**: this behavior is **imposed by the agent's system prompt**,
-> not merely suggested. The agent does not "think it's a good idea": it
-> does it, because it is its procedure.
-
----
-
-## The 3 golden rules (absolute priority)
-
-1. **MEMORY FIRST.** Before reading a file or running a search, the agent
-   calls `query_context` on the topic. The answer may already be in memory.
-2. **WRITE AS YOU GO.** As soon as a durable fact emerges (decision,
-   convention, test result, understood bug), the agent calls `store_entry`
-   **immediately**. Do not defer persistence: unpersisted facts are lost
-   at context compaction.
-3. **PROOF BEFORE VALIDATION.** The agent validates an entry only with
-   **external, checkable evidence** (a test log, a file path, another
-   entry). Never "I think it's true" to raise a score.
+- **The essentials** (below) are injected at the start of every session and
+  reminded by the plugin at every turn.
+- **The detailed reference** (further down) spells out each rule; the agent
+  does not have to memorize it — the essentials are re-read at the right
+  moment.
 
 ---
 
-## The invariants
+## The essentials
 
-### Never guess reliability
+Three **golden rules**, in priority order:
 
-Confidence is **decided by the system** (entry source, evidence, time), not
-by the agent's mood. The agent does not raise its own score: it brings
-evidence, and the model does the rest.
+1. **MEMORY FIRST** — before reading a file or searching the code, query the
+   memory first (`query_context`): the answer may already be there.
+2. **WRITE AS YOU GO** — as soon as a durable fact emerges (decision,
+   convention, test result, understood bug), record it immediately
+   (`store_entry`). Never defer it to the end.
+3. **PROOF BEFORE VALIDATION** — validate or contradict only with external,
+   verifiable evidence, never with reasoning alone.
 
-### Never delete
+**Startup sequence**: read `wpm://project-rules` → `query_context` on the
+current topic → `store_entry` as soon as a durable fact appears →
+`validate_entry` with evidence once confirmed.
 
-Even when an entry is contradicted, the agent **does not delete it**. It
-records a contradiction (with its proof), which drops the score of the
-faulty entry while keeping the trace.
+**Cross-cutting policies**:
 
-### Consult memory before answering
+- **Reliability over completeness**: a false entry is worse than a missing
+  one; better an underpopulated memory than a polluted one.
+- **Write at any time**: the writing tools are used in plan mode, build mode
+  or any mode. Plan mode is not an excuse to defer. If the host blocks the
+  write, retry or switch to build mode.
 
-At the start of every substantive answer, the agent calls `query_context`
-on the current topic. It does not answer from reasoning alone.
-
-### Check conflicts
-
-Before trusting a direct match from `query_context`, the agent looks at the
-`conflicts` section (entries with an active "contradicts" link). An entry
-with an active conflict must not be considered reliable without further
-evidence.
-
----
-
-## The work cycle
-
-```
-              ┌──────────────────────────────────────────────┐
-              │  1. MEMORY FIRST                             │
-              │  query_context(topic) → is there already     │
-              │  a reliable entry on this topic?             │
-              └──────────────┬───────────────────────────────┘
-                             ▼
-              ┌──────────────────────────────────────────────┐
-              │  2. WRITE AS YOU GO                          │
-              │  durable fact? → store_entry immediately,    │
-              │  with source (doc / code / execution /       │
-              │  inference)                                  │
-              └──────────────┬───────────────────────────────┘
-                             ▼
-              ┌──────────────────────────────────────────────┐
-              │  3. PROOF BEFORE VALIDATION                  │
-              │  entry confirmed by external evidence?       │
-              │  → validate_entry(evidence, evidence_ref)    │
-              │  contradicted? → contradict_entry(evidence)  │
-              └──────────────────────────────────────────────┘
-```
+> The detail of each rule (choice of type, source, evidence hierarchy…) lives
+> in the **description of each tool**, re-read at every call — so applied
+> without reading this document.
 
 ---
 
-## Links between entries
+## Detailed reference
 
-When two entries are related (an architecture decision **depends on** a
-convention, an insight **refines** another), the agent calls
-`link_entries(source, target, relation)` with one of the relations:
-`related`, `contradicts`, `depends_on`, `refines`. The "contradicts" link
-is **reserved** for real contradictions (never to express doubt).
+### 1. Content language
 
----
+All stored `content` must be **in English** (embedding consistency).
+Translate before storing. However, the agent's responses and reports stay in
+the user's language — unless `response_language` is set in the config (see
+[`configuration.md`](configuration.md)).
 
-## Project rules: "project" memory vs "session" memory
+### 2. When to write
 
-- **Project** memory is persistent and shared across sessions: this is what
-  WPM stores and weights.
-- Project rules (`rules/wpm-rules.md`) are **recomposed** by the system
-  from the most reliable entries; the agent reads them at the start of
-  every session to respect the project's conventions.
+Write **as you go**: as soon as a durable fact exists, record it without
+waiting for the end of the task (an unwritten fact may disappear at
+compaction). But **don't write just anything**: ask yourself "will this fact
+still be true and useful in several weeks?". A transient detail, an
+unverified hypothesis, an obvious fact already readable in the code: don't
+create an entry.
 
----
+`store_entry` returns a `potential_contradictions` field: very similar entries
+already present. High similarity does not mean contradiction — it may be a
+duplicate (→ `validate_entry` on the existing one) or a real contradiction
+(→ `contradict_entry`). **Compare the contents** before acting.
 
-## Pitfalls to avoid
+### 3. Deduplication before writing
 
-| Pitfall | Correct behavior |
+Before any `store_entry`, do a quick `query_context`. If a very close fact
+already exists: **do not create a duplicate**, call `validate_entry` on the
+existing one. A duplicate splits confidence across two entries.
+
+### 4. Choosing the right `type`
+
+| Type | When to use it |
 |---|---|
-| Validating an entry "to boost it" | Provide external evidence or do nothing |
-| Deleting a false entry | Record a contradiction with proof |
-| Answering without querying memory | Always `query_context` on the current topic |
-| Writing all facts at end of session | `store_entry` as soon as a durable fact emerges |
-| Confusing `agent_inference` with a verified fact | Record the true source, even if unflattering |
+| `doc` | Explanatory/reference content from documentation |
+| `archi_decision` | Structuring choice, observed in the code or decided |
+| `convention` | Naming/style/process rule followed consistently |
+| `insight` | Discovered understanding, durable for weeks/months — neither a decision, nor a rule, nor copied from a doc |
+| `bug_pattern` | Known problem and its cause, with proof — never a guess |
+| `execution_result` | Result of a test/build/lint (via `record_execution`) — ephemeral |
 
----
+Don't force a fact into an unsuitable type out of habit.
 
-## In summary
+### 5. Choosing the right `source`
 
-WPM does not ask the agent to be **smarter**, just more **rigorous and
-disciplined**: query before answering, memorize as you go, prove before
-validating. It is this discipline, repeated every session, that keeps the
-project's memory reliable over time.
+The `source` sets the starting confidence. Never over-declare:
+
+| Source | When |
+|---|---|
+| `official_doc` | Real documentation, read and cited |
+| `observed_code` | Seen directly in the code |
+| `tool_execution` | Result of a command/test actually run |
+| `agent_inference` | Deduction without direct proof — low starting confidence |
+
+A hypothesis uses `agent_inference`, even if it seems solid.
+
+### 6. Validation — evidence hierarchy
+
+`validate_entry` / `contradict_entry` require an `evidence_type` and an
+`evidence_ref` pointing to something **verifiable**.
+
+| Evidence | Strength | Effect |
+|---|---|---|
+| `execution_verified` | strong | test/build/command executed, result observed |
+| `cross_reference` | medium | independent confirmation by another source |
+| `reuse_without_failure` | weak | reused without failure — weak signal |
+| `agent_reasoning` | none | **logged, never moves the score** |
+
+Never use `agent_reasoning` to raise confidence. Don't re-validate in a loop
+to inflate a score (deduplicated per session anyway).
+
+### 7. Contradiction — never delete
+
+If a fact contradicts an existing entry: `contradict_entry` with external
+evidence, **never** delete or overwrite. The contradicted entry's score drops
+faster than a confirmation would raise it (intended).
+
+### 8. Reading — treat results differently
+
+- `direct_matches` — direct match, the most reliable.
+- `related_context` — associative recall (1 graph hop), less reliable, to
+  mention cautiously.
+- `conflicts` — entries in active contradiction. **Always check before relying
+  on a `direct_match`.** Never present a disputed fact as established.
+
+### 9. Explicit links
+
+`link_entries` only for the relations that similarity cannot guess:
+`depends_on`, `refines` (`contradicts` is handled by `contradict_entry`). Don't
+over-link.
+
+### 10. Session discipline
+
+- Stable `session_id` for a whole task (otherwise the anti-loop deduplication
+  loses its effect).
+- At the end of a task, do a last pass: is there any fact left
+  unpersisted? Write it before considering the task complete.
+
+### 11. Dedicated workflows
+
+The `learn`/`map`/`bootstrap`/`audit`/`patterns` workflows are the
+**controlled** ingestion; they do not replace incremental memorization. See
+[`workflows.md`](workflows.md).
+
+### 12. Lifecycle: pin, deprecate, restore
+
+- **`pin_entry`** — freeze the confidence (no more decay). For foundational
+  decisions, imposed conventions, entries validated 3+ times (>0.8). Never an
+  `insight`/`bug_pattern`/`execution_result` nor a disputed entry.
+- **`deprecate_entry`** — exclude an obsolete entry (settled contradiction,
+  gone code, fixed bug). Reversible.
+- **`restore_entry`** — put an entry back to active status (premature
+  deprecation, pin no longer justified).
+
+### 13. What to never do
+
+- Store in a language other than English.
+- Create an entry without checking that it doesn't already exist.
+- Validate with `agent_reasoning` to inflate a score.
+- Delete or overwrite a contradicted entry.
+- Present a `direct_match` as reliable without checking `conflicts`.
+- Defer writing an important fact "for later".
+- Over-link entries with no real relation.
+- Pin an `insight`/`bug_pattern`/`execution_result` or an unvalidated entry.
+- Deprecate without being certain of the obsolescence.
+- Ignore the problems reported by `audit`.
+- Defer persistence because you're in plan mode — if the write is blocked,
+  switch to build mode.

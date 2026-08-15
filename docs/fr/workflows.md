@@ -1,106 +1,80 @@
-# Workflows — les 5 commandes de WPM
+# Workflows — `learn`, `map`, `bootstrap`, `audit`, `patterns`
 
-WPM expose 5 workflows sous forme de commandes : `learn`, `map`,
-`bootstrap`, `audit`, `patterns`. Elles peuvent être invoquées
-directement (CLI) ou par l'agent via les outils MCP correspondants.
+Cinq workflows prêts à l'emploi pour alimenter ou inspecter la mémoire du
+projet. Dans OpenCode, ce sont des commandes slash (ex. `/wpm:learn:mcp`) ;
+ils ne s'exécutent que sur invocation explicite.
 
-L'usage quotidien est décrit dans [`agent-behavior.md`](agent-behavior.md) ;
-ce document décrit **ce que chaque workflow fait**.
+## Deux façons de mémoriser, à ne pas confondre
 
----
+- **Mémorisation incrémentale (automatique)** — pendant son travail, l'agent
+  note tout fait durable dès qu'il le rencontre. C'est le comportement par
+  défaut, décrit dans [`agent-behavior.md`](agent-behavior.md). Les
+  workflows ne le remplacent pas.
+- **Ingestion contrôlée (manuelle)** — `learn`, `map` et `bootstrap`
+  servent à apporter **en masse** des documents, une cartographie du code,
+  ou un peuplement initial. Pas pour les faits ponctuels d'une tâche.
 
-## 1. `wpm learn`
+## Garde commune
 
-But : **mémoriser un fait durable** découvert pendant le travail.
-
-En une phrase : *« on vient de découvrir ça, on le note, avec sa source et
-son degré de certitude. »*
-
-| Point | Détail |
-|---|---|
-| Type d'entrée | `doc`, `archi_decision`, `insight`, `convention`, `bug_pattern`, `execution_result` |
-| Source | `official_doc`, `observed_code`, `tool_execution`, `agent_inference` |
-| Effet | crée l'entrée avec une **confiance de départ** selon la source (haute pour un fait vérifié, basse pour une hypothèse) |
-| Variante | `wpm enable` active la mémorisation automatique au fil de l'eau |
-
-C'est la commande **la plus utilisée** : c'est elle qui alimente la mémoire.
+- Si `wpm.config.json` n'existe pas, la mémoire n'est pas activée : lancez
+  `wpm enable` à la racine du projet puis redémarrez OpenCode.
+- Si aucun chemin n'est fourni à `learn` ou `map`, le prompt affiche
+  uniquement son usage et ne devine rien.
 
 ---
 
-## 2. `wpm map`
+## `learn <chemins>`
 
-But : **inventorier le projet** — sa structure, ses conventions, ses règles.
+Ingère un ou plusieurs documents markdown, section par section.
 
-En une phrase : *« au premier passage sur un projet, on prend des notes sur
-la façon dont il est organisé. »*
+- Chaque section (`##`/`###`) devient une entrée candidate.
+- **Déduplication** : avant d'écrire, le workflow vérifie si le fait existe
+  déjà ; si oui, il revalide au lieu de créer un doublon.
+- Contenu **traduit en anglais**, reformulé de façon concise.
+- Type inféré (`doc`, `archi_decision`, `convention`, `bug_pattern`),
+  source `official_doc`.
+- Rendu d'un **résumé** : par fichier, sections stockées / dédupliquées /
+  ignorées.
 
-| Point | Détail |
-|---|---|
-| Type d'entrée | `doc`, `insight`, `convention` |
-| Source | `observed_code` (défaut) |
-| Effet | mémorise la structure (`src/`, conventions de nommage, architecture) |
-| Auto | exécuté automatiquement à la première session sur un projet |
+## `map [scopes]`
 
----
+Cartographie l'architecture et les conventions de la base de code.
 
-## 3. `wpm bootstrap`
+- **Pas un index fichier par fichier** : seuls quelques faits structurants,
+  toujours ancrés dans du code réellement lu.
+- Types : `archi_decision`, `convention`, `bug_pattern` ; source
+  `observed_code`.
+- Même déduplication que `learn`, avec un résumé final (stocké / revalidé /
+  écarté faute de confiance).
 
-But : **initialiser la base de mémoire** et les règles du projet.
+## `bootstrap`
 
-En une phrase : *« on prépare le terrain la première fois. »*
+Peuple la mémoire à partir des artefacts existants (README, docs, configs de
+lint, CI/CD, structure de dossiers) — en une seule passe. À lancer une fois
+par projet, après `wpm enable`, puis la mémorisation incrémentale prend le
+relais.
 
-| Point | Détail |
-|---|---|
-| Schéma | crée `wpm_memory.db` dans `<projet>/.wpm/` (table `memory`…) |
-| Règles | indexe `rules/wpm-rules.md` (auto-généré) |
-| N'affiche rien | s'exécute en sous-processus, silencieux |
+## `audit`
 
-Il est lancé automatiquement par le serveur au démarrage ; pas besoin de
-l'appeler à la main, sauf pour déboguer.
+Tableau de bord **en lecture seule** de la santé de la mémoire : total par
+type, distribution de confiance, entrées jamais validées, contradictions
+actives, 5 entrées les plus faibles, activité récente. Se termine par un
+verdict (« Memory is healthy » / « N issues need attention ») et peut
+suggérer des actions (`pin_entry`, `deprecate_entry`, `restore_entry`)
+sans les exécuter.
 
----
+## `patterns [type]`
 
-## 4. `wpm audit`
-
-But : **examiner l'état de la mémoire**.
-
-En une phrase : *« qu'est-ce qu'on a en mémoire, est-ce que c'est
-fiable, est-ce que ça contredit autre chose ? »*
-
-| Point | Détail |
-|---|---|
-| Statistiques | nombre d'entrées par type, distribution de confiance, entrées jamais validées, contradictions actives, 5 entrées les moins fiables |
-| Diagnostic | liste les entrées à faible confiance (à valider ou dépolluer) |
-| Usage | à lancer régulièrement pour maintenir une mémoire saine |
-
----
-
-## 5. `wpm patterns`
-
-But : **détecter des patterns récurrents** dans la mémoire.
-
-En une phrase : *« y a-t-il des schémas qui ressortent des notes, qu'on
-n'a pas remarqués ? »*
-
-| Point | Détail |
-|---|---|
-| Analyse | met en évidence des régularités entre entrées liées |
-| Usage | utile en fin de travail ou de sprint pour capitaliser |
-| État | workflow expérimental, résultats à interpréter |
+Analyse la mémoire pour détecter des patterns récurrents et propose des
+améliorations : convention manquante, décision implicite, contradiction à
+résoudre. Les actions proposées sont **exécutées automatiquement** (par
+exemple : 4+ `bug_pattern` de même cause → créer une `convention` ; une
+convention validée 3+ fois → `pin_entry`). Si rien n'émerge, le résultat
+négatif est signalé.
 
 ---
 
-## Résumé
-
-| Commande | But | Fréquence |
-|---|---|---|
-| `learn` | mémoriser un fait | au fil de l'eau |
-| `map` | inventorier le projet | première session + nouveautés |
-| `bootstrap` | initialiser la base | automatique |
-| `audit` | diagnostiquer la mémoire | régulier |
-| `patterns` | détecter des régularités | occasionnel |
-
-La mémorisation de ces commandes est **automatique** : quand l'agent les
-exécute, les résultats utiles sont persistés dans la mémoire (via
-`record_execution` pour les commandes de vérification, via `store_entry`
-pour les faits découverts).
+> Après une ingestion, lisez le résumé : des faits « écartés » indiquent un
+> tri volontaire (trop vague, trop incertain), pas un échec. Vous pouvez
+> ensuite renforcer les entrées au fil des sessions (`validate_entry`,
+> `contradict_entry`).

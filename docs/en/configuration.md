@@ -1,164 +1,139 @@
-# Configuration — WPM parameters
+# Configuration — `wpm.config.json`
 
-This page describes the **`wpm.config.json`** configuration file (created
-in `<project>/.wpm/` on first run). A complete example is provided:
-[`wpm.config.example.json`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/wpm.config.example.json).
-
-> **Recommended reading first**: [`concepts.md`](concepts.md) to understand
-> the notions of confidence, decay, and evidence.
+Reference for the configuration file. **In practice, you often have
+nothing to write by hand**: `wpm enable` creates the file with a default
+`db_path`, and most settings are optional.
 
 ---
 
-## 1. General structure
+## What you need to know first
 
-```jsonc
+`wpm.config.json` lives at the **root of the project**. It is the **activation
+marker**: without it (nor `WPM_DB_PATH`), the server starts in **inert**
+mode — it lists its tools but each call returns "wpm is not activated in this
+project".
+
+The server is registered **automatically by the OpenCode plugin** (no manual
+configuration in `opencode.json`). The file is therefore mostly used to say
+*where* the database lives and, if needed, to adjust a few settings.
+
+Minimal example (often sufficient):
+
+```json
 {
-  "storage": {
-    "root_dir": ".wpm",
-    "db_path": "wpm_memory.db",
-    "rules_dir": "rules"
-  },
-  "decay": {
-    "enabled": true,
-    "rates": {
-      "doc": 1e-5,
-      "archi_decision": 1e-5,
-      "insight": 1e-4,
-      "convention": 1e-5,
-      "bug_pattern": 1e-4
-    }
-  },
-  "validation": {
-    "source_weights": {
-      "official_doc": 0.9,
-      "observed_code": 0.75,
-      "tool_execution": 0.7,
-      "agent_inference": 0.2
-    },
-    "thresholds": {
-      "low": 0.3,
-      "high": 0.7,
-      "project_rules": 0.7
-    },
-    "boost": 0.05,
-    "penalty": 0.3,
-    "link_weight": 0.1
-  },
-  "retrieval": {
-    "min_confidence": 0.0,
-    "top_k": 8,
-    "graph_alpha": 0.5
+  "db_path": ".wpm/wpm.db"
+}
+```
+
+An absent key keeps its default value; an **unknown** key (typo) raises an
+explicit error at startup rather than being ignored.
+
+---
+
+## Basic settings
+
+### `db_path` — SQLite database (required)
+
+```json
+"db_path": ".wpm/wpm.db"
+```
+
+| | |
+|---|---|
+| Required | yes (otherwise inert server) |
+
+Path of the SQLite file. A **relative path is resolved relative to the
+directory that contains `wpm.config.json`**. The database must stay **inside
+the project** (a path leaving it, including via a symlink, is refused).
+Precedence: `WPM_DB_PATH` (env) > `db_path` (file).
+
+### `confidence_threshold` — project-rules threshold (optional, default 0.5)
+
+Confidence threshold below which an entry is not injected into the
+`<project-rules>` block recomposed from the memory. Only adjustable in
+the file (no env variable).
+
+```json
+"confidence_threshold": 0.6
+```
+
+### `response_language` — response language (optional, default auto)
+
+Sets the language of the agent's **responses, summaries and reports** — **not**
+the stored content, which stays in English.
+
+- Absent, `null` or `"auto"`: the agent responds in the user's language.
+- Fixed value (e.g. `"french"`): the agent always responds in that language.
+
+```json
+"response_language": "french"
+```
+
+Override: `WPM_RESPONSE_LANGUAGE`. The value is read at server startup
+(restart required to change).
+
+### `verification_command_patterns` — strong-evidence commands (optional, default [])
+
+List of regexes **added** to the hard-coded list of commands whose success
+counts as strong evidence (`execution_verified`) for `record_execution`.
+
+```json
+"verification_command_patterns": ["\\bmy-custom-runner\\b"]
+```
+
+Only add commands whose `exit 0` **proves** something (tests, build, lint).
+**Never** add `ls`, `cat`, `echo`, `grep`, `git status`/`diff`: `exit 0` proves
+nothing there.
+
+---
+
+## Advanced: the `domain` section
+
+**To leave aside unless you explicitly need tuning.** This section only
+concerns the scoring and retrieval formulas. It is made of 6 sub-sections,
+all under `"domain"`:
+
+| Section | Rule |
+|---|---|
+| `provenance` | starting confidence according to `source` |
+| `decay` | confidence erosion rate (λ) per `type` |
+| `evidence` | how much `validation_score` moves per evidence |
+| `validation` | score bounds + deduplication window |
+| `retrieval` | similarity/confidence/centrality weighting |
+| `expansion` | graph expansion + auto-linking thresholds |
+
+You only replace what you need:
+
+```json
+{
+  "db_path": ".wpm/wpm.db",
+  "domain": {
+    "retrieval": { "weight_similarity": 0.6 }
   }
 }
 ```
 
----
-
-## 2. Storage (`storage`)
-
-| Key | Role | Default |
-|---|---|---|
-| `root_dir` | memory directory inside the project | `.wpm` |
-| `db_path` | SQLite file of the memory | `wpm_memory.db` |
-| `rules_dir` | project rules directory | `rules` |
+The full detail of each sub-section, with its default values, is in
+[`wpm-mcp-server/wpm.config.example.json`](../wpm-mcp-server/wpm.config.example.json).
 
 ---
 
-## 3. Decay (`decay`)
+## Environment variables
 
-An entry's confidence **decreases** over time if it is not revalidated. The
-rate is **per type**: a `doc` or an `archi_decision` ages very slowly, a
-`bug_pattern` or an `insight` faster.
-
-| Rate | Effect on an entry scored 0.9 |
+| Variable | Overrides |
 |---|---|
-| `1e-5` | almost stable over months (architecture decision) |
-| `1e-4` | clear erosion after a few weeks (bug, insight) |
+| `WPM_CONFIG_PATH` | which JSON file is read |
+| `WPM_DB_PATH` | `db_path` |
+| `WPM_RESPONSE_LANGUAGE` | `response_language` |
+| `WPM_EMBEDDING_MODEL` | embedding model (default `all-MiniLM-L6-v2`) |
 
-Decay applies on every **read** (`query_context`) and every **write**
-(`store_entry`): an entry untouched for a long time is less reliable than
-one regularly reused.
-
----
-
-## 4. Validation (`validation`)
-
-### 4.1 Source weights
-
-Initial confidence of an entry based on its origin (see
-[`concepts.md`](concepts.md)):
-
-| Source | Weight | Reading |
-|---|---|---|
-| `official_doc` | `0.9` | official document read and cited |
-| `observed_code` | `0.75` | code seen directly |
-| `tool_execution` | `0.7` | command actually executed |
-| `agent_inference` | `0.2` | deduction without direct proof |
-
-### 4.2 Thresholds
-
-| Threshold | Value | Role |
-|---|---|---|
-| `low` | `0.3` | below: "at risk" entry, poorly reliable |
-| `high` | `0.7` | above: entry considered reliable |
-| `project_rules` | `0.7` | above: entry eligible for project rules |
-
-### 4.3 Rewards and penalties
-
-- `boost` (`0.05`): confidence **increment** when an entry is **validated**
-  with external evidence.
-- `penalty` (`0.3`): **decrement** when an entry is **contradicted** (a
-  contradiction drops the score **faster** than a confirmation raises it:
-  0.3 vs 0.05).
-- `link_weight` (`0.1`): confidence bonus related to **links** between
-  entries (graph centrality).
+The `domain` keys have no env variable: only adjustable via the file.
 
 ---
 
-## 5. Retrieval (`retrieval`)
+## Embeddings (fixed)
 
-| Key | Role | Default |
-|---|---|---|
-| `min_confidence` | threshold below which an entry is not surfaced | `0.0` |
-| `top_k` | number of matches returned | `8` |
-| `graph_alpha` | weight of the graph (links) vs vector similarity | `0.5` |
-
----
-
-## 6. Environment variables
-
-Environment variables **override** the config file:
-
-| Variable | Effect |
-|---|---|
-| `WPM_ROOT` | overrides `storage.root_dir` (project directory) |
-| `WPM_ALPHA` | overrides `retrieval.graph_alpha` |
-
----
-
-## 7. FAQ
-
-**Q: Why does `agent_inference` start at 0.2?**
-A deduction without proof is a hypothesis. It stays memorized (useful for
-traceability), but it must be validated with external evidence to gain
-reliability.
-
-**Q: Can I tune the thresholds?**
-Yes, in `wpm.config.json`. But note: the confidence model is a **work in
-progress**, not calibrated on real projects (see the
-[design notes](https://github.com/nohavye-dev/wpm-system/tree/main/docs/internal)).
-Changing values at random can produce a memory that no longer reflects
-reality.
-
-**Q: Why is the penalty (0.3) so high compared to the boost (0.05)?**
-That is intentional: a cautious memory is better than an inflated one. A
-contradiction must be visible and costly; a boost, by contrast, requires
-many confirmations to durably raise an entry.
-
----
-
-## 8. Going further
-
-- [`setup.md`](setup.md) — install and configure the MCP server.
-- [`concepts.md`](concepts.md) — confidence, decay, and evidence notions.
-- [Server README](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md) — the commands and the protocol.
+Embeddings use ONNX Runtime + HuggingFace tokenizers, model
+`all-MiniLM-L6-v2` (384 dimensions), downloaded at first start and cached.
+Changing the model (`WPM_EMBEDDING_MODEL`) after inserting entries requires
+re-embedding the database (delete `.wpm/wpm.db`).
