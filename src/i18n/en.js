@@ -31,6 +31,21 @@ export default {
       title: "Why WPM?",
       text: "An AI agent works in a limited, ephemeral context: what it understands during a session is gone at the next one. WPM gives it a project-local memory, maintained automatically while working, where each piece of information carries a confidence score that evolves over time.",
     },
+    proof: {
+      badge: "Fun fact",
+      title: "Blind test: he knows the site by heart",
+      intro:
+        "To check its memory wasn't bluffing, the agent was challenged to describe the whole project… without reading a single file. 39 seconds later, it hadn't forgotten a thing.",
+      stats: [
+        { value: "33", label: "memories in its head" },
+        { value: "0", label: "file opened (we swear)" },
+        { value: "0.99", label: "confidence in its claims" },
+        { value: "100%", label: "straight from memory" },
+      ],
+      footnote:
+        "WPM is the memory that does the heavy lifting. It grows every session and only trusts hard evidence — not impressions.",
+      cta: "How did it do it?",
+    },
     ideas: {
       title: "Key ideas",
       intro: "What sets WPM apart from a simple notebook.",

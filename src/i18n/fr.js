@@ -31,6 +31,21 @@ export default {
       title: "Pourquoi WPM ?",
       text: "Le contexte d'un agent IA est éphémère : ce qu'il comprend pendant une session disparaît à la suivante. WPM lui donne une mémoire locale au projet, entretenue automatiquement pendant le travail, où chaque information porte un score de confiance qui évolue dans le temps.",
     },
+    proof: {
+      badge: "Fun fact",
+      title: "Blind test : il connaît le site par cœur",
+      intro:
+        "Pour vérifier que sa mémoire ne bluffe pas, on a mis l'agent au défi : décrire tout le projet… sans lire un seul fichier. 39 secondes plus tard, il n'avait rien oublié.",
+      stats: [
+        { value: "33", label: "souvenirs en tête" },
+        { value: "0", label: "fichier ouvert (promis, juré)" },
+        { value: "0.99", label: "de confiance dans ses dires" },
+        { value: "100 %", label: "sorti de mémoire" },
+      ],
+      footnote:
+        "WPM, c'est la mémoire qui fait le travail à sa place. Elle se construit à chaque session et ne valide qu'avec des preuves — pas des impressions.",
+      cta: "Comment il a fait ?",
+    },
     ideas: {
       title: "Les idées clés",
       intro: "Ce qui distingue WPM d'un simple carnet de notes.",

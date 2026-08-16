@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useI18n } from "../i18n/I18nContext.jsx";
 import CodeBlock from "../components/CodeBlock.jsx";
+import OpenCodeTerminal from "../components/OpenCodeTerminal.jsx";
 
 export default function Home() {
   const { t } = useI18n();
@@ -8,6 +9,7 @@ export default function Home() {
   const benefits = t("home.benefits.items");
   const steps = t("home.install.steps");
   const phaseItems = t("home.phase.items");
+  const proofStats = t("home.proof.stats");
 
   return (
     <div>
@@ -40,6 +42,30 @@ export default function Home() {
         <div className="container">
           <h2 className="section__title">{t("home.why.title")}</h2>
           <p className="section__intro">{t("home.why.text")}</p>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <span className="badge">{t("home.proof.badge")}</span>
+          <h2 className="section__title">{t("home.proof.title")}</h2>
+          <p className="section__intro">{t("home.proof.intro")}</p>
+
+          <OpenCodeTerminal />
+
+          <div className="proof-stats">
+            {proofStats.map((s, i) => (
+              <div className="proof-stat" key={i}>
+                <div className="proof-stat__value">{s.value}</div>
+                <div className="proof-stat__label">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <p className="proof__footnote">{t("home.proof.footnote")}</p>
+          <Link to="/concepts" className="btn btn--ghost">
+            {t("home.proof.cta")}
+          </Link>
         </div>
       </section>
 

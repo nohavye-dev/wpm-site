@@ -382,6 +382,228 @@ code {
   margin: 12px 0;
 }
 
+/* ── Terminal (opencode replay) ─────────────────────── */
+
+.terminal {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  overflow: hidden;
+  margin: 0 0 20px;
+}
+
+.terminal__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-soft);
+  border-bottom: 1px solid var(--border);
+}
+
+.terminal__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal__dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+}
+
+.terminal__dots i:nth-child(1) { background: #f87171; }
+.terminal__dots i:nth-child(2) { background: #fbbf24; }
+.terminal__dots i:nth-child(3) { background: #34d399; }
+
+.terminal__title {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.terminal__model {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.terminal__body {
+  padding: 14px 16px;
+  max-height: 480px;
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.terminal__prompt {
+  border-left: 3px solid #d4a054;
+  background: rgba(212, 160, 84, 0.08);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.terminal__prompt p {
+  margin: 0;
+  color: var(--text);
+}
+
+.terminal__thought {
+  color: #d4a054;
+  font-style: italic;
+  margin: 6px 0;
+}
+
+.terminal__tool {
+  margin: 6px 0;
+  color: var(--text-dim);
+}
+
+.terminal__tool-icon {
+  font-size: 1.1em;
+  margin-right: 6px;
+}
+
+.terminal__tool-args {
+  color: var(--text-faint);
+}
+
+.terminal__answer {
+  margin-top: 12px;
+}
+
+.terminal__footer {
+  color: var(--text-faint);
+  font-size: 0.86rem;
+  margin-top: 10px;
+}
+
+.terminal__footer-mark {
+  color: var(--accent);
+}
+
+.terminal__message {
+  color: var(--text-dim);
+  border-left: 3px solid var(--accent);
+  background: rgba(139, 92, 246, 0.06);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 12px;
+  margin: 8px 0;
+}
+
+.terminal__plain {
+  color: var(--text-dim);
+  margin: 8px 0;
+}
+
+.terminal .markdown {
+  max-width: none;
+  color: var(--text-dim);
+}
+
+.terminal .markdown h1,
+.terminal .markdown h2,
+.terminal .markdown h3,
+.terminal .markdown h4 {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #a78bfa;
+  border-bottom: none;
+}
+
+.terminal .markdown h1 {
+  font-size: 0.86rem;
+  margin: 18px 0 8px;
+}
+
+.terminal .markdown h2 {
+  font-size: 0.86rem;
+  margin: 16px 0 6px;
+}
+
+.terminal .markdown h3 {
+  font-size: 0.86rem;
+  margin: 14px 0 6px;
+}
+
+.terminal .markdown p {
+  margin: 0 0 10px;
+}
+
+.terminal .markdown ul,
+.terminal .markdown ol {
+  margin: 0 0 10px;
+  padding-left: 20px;
+}
+
+.terminal .markdown li {
+  margin: 2px 0;
+}
+
+.terminal .markdown code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #34d399;
+}
+
+.terminal .markdown strong {
+  color: #f2a541;
+}
+
+.terminal .markdown a {
+  color: var(--accent-2);
+}
+
+/* ── Proof (fun fact) ───────────────────────────────── */
+
+.proof-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 20px 0 24px;
+}
+
+.proof-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+}
+
+.proof-stat__value {
+  font-family: var(--mono);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+
+.proof-stat__label {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+}
+
+.proof__footnote {
+  color: var(--text-faint);
+  font-size: 0.9rem;
+  max-width: 720px;
+  margin: 0 0 20px;
+}
+
 .codeblock__lang {
   font-family: var(--mono);
   font-size: 0.72rem;
@@ -988,5 +1210,9 @@ code {
   .md-table-wrap .mono-cell {
     white-space: normal;
     overflow-wrap: anywhere;
+  }
+
+  .terminal__body {
+    max-height: 400px;
   }
 }
