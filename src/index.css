@@ -419,14 +419,14 @@ code {
 
 .terminal__title {
   font-family: var(--mono);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   color: var(--text-dim);
   flex: 1;
 }
 
 .terminal__model {
   font-family: var(--mono);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   color: var(--text-faint);
   border: 1px solid var(--border);
   background: var(--card);
@@ -436,10 +436,10 @@ code {
 
 .terminal__body {
   padding: 14px 16px;
-  max-height: 480px;
+  max-height: 600px;
   overflow-y: auto;
   font-family: var(--mono);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   line-height: 1.6;
 }
 
@@ -482,12 +482,16 @@ code {
 
 .terminal__footer {
   color: var(--text-faint);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   margin-top: 10px;
 }
 
 .terminal__footer-mark {
   color: var(--accent);
+}
+
+.terminal__footer-mark--orange {
+  color: #d4a054;
 }
 
 .terminal__message {
@@ -520,17 +524,17 @@ code {
 }
 
 .terminal .markdown h1 {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   margin: 18px 0 8px;
 }
 
 .terminal .markdown h2 {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   margin: 16px 0 6px;
 }
 
 .terminal .markdown h3 {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   margin: 14px 0 6px;
 }
 
@@ -552,6 +556,7 @@ code {
   background: none;
   border: none;
   padding: 0;
+  font-size: 1em;
   color: #34d399;
 }
 
@@ -601,7 +606,11 @@ code {
   color: var(--text-faint);
   font-size: 0.9rem;
   max-width: 720px;
-  margin: 0 0 20px;
+  margin: 0 0 64px;
+}
+
+.proof__cta {
+  text-align: center;
 }
 
 .codeblock__lang {
@@ -1213,6 +1222,6 @@ code {
   }
 
   .terminal__body {
-    max-height: 400px;
+    max-height: 470px;
   }
 }

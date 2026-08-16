@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { steps } from "../data/opencodeProof.js";
+import { steps, stepsEn } from "../data/opencodeProof.js";
+import { useI18n } from "../i18n/I18nContext.jsx";
 
 function ExternalLink({ href, children }) {
   if (!href || !href.startsWith("http")) return children;
@@ -45,7 +46,15 @@ function Step({ step }) {
     case "footer":
       return (
         <div className="terminal__footer">
-          <span className="terminal__footer-mark">▣</span>
+          <span
+            className={
+              step.tone === "orange"
+                ? "terminal__footer-mark terminal__footer-mark--orange"
+                : "terminal__footer-mark"
+            }
+          >
+            ▣
+          </span>
           <span className="terminal__footer-text"> {step.text}</span>
         </div>
       );
@@ -59,6 +68,9 @@ function Step({ step }) {
 }
 
 export default function OpenCodeTerminal() {
+  const { lang } = useI18n();
+  const transcript = lang === "fr" ? steps : stepsEn;
+
   return (
     <div className="terminal">
       <div className="terminal__bar">
@@ -71,7 +83,7 @@ export default function OpenCodeTerminal() {
         <span className="terminal__model">big-pickle</span>
       </div>
       <div className="terminal__body">
-        {steps.map((step, i) => (
+        {transcript.map((step, i) => (
           <Step key={i} step={step} />
         ))}
       </div>

@@ -33,9 +33,9 @@ export default {
     },
     proof: {
       badge: "Fun fact",
-      title: "Blind test: he knows the site by heart",
+      title: "Blind test: he knows this site by heart",
       intro:
-        "To check its memory wasn't bluffing, the agent was challenged to describe the whole project… without reading a single file. 39 seconds later, it hadn't forgotten a thing.",
+        "To check its memory wasn't bluffing, the agent was challenged to describe the project of this very site — without ever opening a single file. 39 seconds later, it hadn't forgotten a thing.",
       stats: [
         { value: "33", label: "memories in its head" },
         { value: "0", label: "file opened (we swear)" },
@@ -43,8 +43,8 @@ export default {
         { value: "100%", label: "straight from memory" },
       ],
       footnote:
-        "WPM is the memory that does the heavy lifting. It grows every session and only trusts hard evidence — not impressions.",
-      cta: "How did it do it?",
+        "What you just read, the agent pulled straight from memory, without touching a file. WPM does the heavy lifting — it only trusts hard evidence, not impressions.",
+      cta: "But how did it do it ?",
     },
     ideas: {
       title: "Key ideas",

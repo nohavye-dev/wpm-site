@@ -63,9 +63,11 @@ export default function Home() {
           </div>
 
           <p className="proof__footnote">{t("home.proof.footnote")}</p>
-          <Link to="/concepts" className="btn btn--ghost">
-            {t("home.proof.cta")}
-          </Link>
+          <div className="proof__cta">
+            <Link to="/concepts" className="btn btn--primary">
+              {t("home.proof.cta")}
+            </Link>
+          </div>
         </div>
       </section>
 

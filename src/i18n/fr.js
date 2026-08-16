@@ -33,18 +33,18 @@ export default {
     },
     proof: {
       badge: "Fun fact",
-      title: "Blind test : il connaît le site par cœur",
+      title: "Blind test : il connaît ce site par cœur",
       intro:
-        "Pour vérifier que sa mémoire ne bluffe pas, on a mis l'agent au défi : décrire tout le projet… sans lire un seul fichier. 39 secondes plus tard, il n'avait rien oublié.",
+        "Pour vérifier que sa mémoire ne bluffe pas, on a mis l'agent au défi : Décrire le projet de ce site même — sans jamais ouvrir un seul fichier. 39 secondes plus tard, il n'avait rien oublié.",
       stats: [
         { value: "33", label: "souvenirs en tête" },
         { value: "0", label: "fichier ouvert (promis, juré)" },
         { value: "0.99", label: "de confiance dans ses dires" },
-        { value: "100 %", label: "sorti de mémoire" },
+        { value: "100 %", label: "de mémoire vive" },
       ],
       footnote:
-        "WPM, c'est la mémoire qui fait le travail à sa place. Elle se construit à chaque session et ne valide qu'avec des preuves — pas des impressions.",
-      cta: "Comment il a fait ?",
+        "Ce que vous venez de lire, l'agent l'a sorti de mémoire, sans toucher un fichier. WPM, c'est la mémoire qui fait le travail à sa place — elle ne valide que des preuves, pas des impressions.",
+      cta: "Mais comment a-t-il fait ?",
     },
     ideas: {
       title: "Les idées clés",
