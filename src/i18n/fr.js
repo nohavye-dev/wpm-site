@@ -13,6 +13,8 @@ export default {
     analogy: "Analogie",
     backHome: "Retour à l'accueil",
     github: "GitHub",
+    menu: "Menu",
+    close: "Fermer",
     repoUrl: "https://github.com/nohavye-dev/wpm-system",
   },
 

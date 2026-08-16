@@ -1,8 +1,19 @@
+import { useState, useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
 import { useI18n } from "../i18n/I18nContext.jsx";
 
 export default function Navbar() {
   const { t, lang, setLang } = useI18n();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   const links = [
     { to: "/", label: t("nav.home") },
@@ -21,7 +32,10 @@ export default function Navbar() {
           <span className="navbar__logo">WPM</span>
           <span className="navbar__tagline">Weighted Persistent Memory</span>
         </Link>
-        <nav className="navbar__links">
+        <nav
+          id="navbar-links"
+          className={open ? "navbar__links is-open" : "navbar__links"}
+        >
           {links.map((l) =>
             l.href ? (
               <a
@@ -30,6 +44,7 @@ export default function Navbar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="navbar__link"
+                onClick={() => setOpen(false)}
               >
                 {l.label}
               </a>
@@ -41,6 +56,7 @@ export default function Navbar() {
                 className={({ isActive }) =>
                   isActive ? "navbar__link is-active" : "navbar__link"
                 }
+                onClick={() => setOpen(false)}
               >
                 {l.label}
               </NavLink>
@@ -64,6 +80,18 @@ export default function Navbar() {
             EN
           </button>
         </div>
+        <button
+          type="button"
+          className={open ? "navbar__burger is-open" : "navbar__burger"}
+          aria-expanded={open}
+          aria-controls="navbar-links"
+          aria-label={open ? t("common.close") : t("common.menu")}
+          onClick={() => setOpen((o) => !o)}
+        >
+          <span className="navbar__burger-bar" />
+          <span className="navbar__burger-bar" />
+          <span className="navbar__burger-bar" />
+        </button>
       </div>
     </header>
   );
