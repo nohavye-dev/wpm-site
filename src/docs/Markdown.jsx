@@ -2,8 +2,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Link } from "react-router-dom";
 import { Children, cloneElement } from "react";
+import { useI18n } from "../i18n/I18nContext.jsx";
 
 function DocLink({ href, children }) {
+  const { lang } = useI18n();
   if (!href) return children;
   if (href.startsWith("http://") || href.startsWith("https://")) {
     return (
@@ -19,7 +21,9 @@ function DocLink({ href, children }) {
   if (path.endsWith(".md")) {
     const slug = path.replace(/\.md$/, "").replace(/^\.\//, "");
     return (
-      <Link to={`/docs/${slug}${hash ? `#${hash}` : ""}`}>{children}</Link>
+      <Link to={`/${lang}/docs/${slug}${hash ? `#${hash}` : ""}`}>
+        {children}
+      </Link>
     );
   }
   return <a href={href}>{children}</a>;

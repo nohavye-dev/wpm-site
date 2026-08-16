@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom";
 import { useI18n } from "../i18n/I18nContext.jsx";
 import { DOCS, DOC_ORDER } from "../docs/docsData.js";
+import usePageMeta from "../hooks/usePageMeta.js";
+import { seoFor } from "../seo.js";
 
 export default function Docs() {
   const { t, lang } = useI18n();
+  usePageMeta(seoFor(lang, "docs"));
   const items = DOCS[lang];
 
   return (
@@ -18,7 +21,7 @@ export default function Docs() {
           return (
             <Link
               key={slug}
-              to={`/docs/${slug}`}
+              to={`/${lang}/docs/${slug}`}
               className="docs-item docs-item--link"
             >
               <span className="docs-item__path">{slug}.md</span>

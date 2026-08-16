@@ -491,6 +491,44 @@ export default {
     backToDocs: "Retour à la documentation",
   },
 
+  seo: {
+    home: {
+      title: "WPM — Weighted Persistent Memory",
+      description:
+        "WPM (Weighted Persistent Memory) : une mémoire persistante pondérée par la confiance pour vos agents IA (OpenCode). Les décisions, conventions et patterns d'une session ne se perdent plus à la suivante.",
+    },
+    concepts: {
+      title: "Concepts — WPM",
+      description:
+        "Les concepts de WPM : mémoire persistante, score de confiance, preuves et contradictions. Comment les agents IA gardent des souvenirs fiables entre les sessions.",
+    },
+    features: {
+      title: "Fonctionnalités — WPM",
+      description:
+        "Les outils et workflows de WPM : learn, map, bootstrap, audit, patterns. Une mémoire de confiance pour votre agent IA OpenCode.",
+    },
+    installation: {
+      title: "Installation — WPM",
+      description:
+        "Installer WPM en 3 commandes, l'activer dans OpenCode et configurer la mémoire persistante pondérée par la confiance.",
+    },
+    architecture: {
+      title: "Architecture — WPM",
+      description:
+        "L'architecture de WPM : base SQLite locale, scores de confiance, validation par preuves, indexation hybride. La mémoire pour agents IA.",
+    },
+    docs: {
+      title: "Documentation — WPM",
+      description:
+        "La documentation complète de WPM : concepts, installation, workflows, comportement de l'agent et configuration — en français et en anglais.",
+    },
+    docsDoc: {
+      title: "Documentation — WPM",
+      description:
+        "Documentation de WPM — Weighted Persistent Memory : la mémoire persistante pondérée par la confiance pour vos agents IA.",
+    },
+  },
+
   footer: {
     tagline: "Une mémoire persistante, pondérée par la confiance, pour vos agents IA.",
     forOpencode: "Conçu pour OpenCode",

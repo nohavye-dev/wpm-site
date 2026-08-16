@@ -2,9 +2,12 @@ import { Link } from "react-router-dom";
 import { useI18n } from "../i18n/I18nContext.jsx";
 import CodeBlock from "../components/CodeBlock.jsx";
 import OpenCodeTerminal from "../components/OpenCodeTerminal.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
+import { seoFor } from "../seo.js";
 
 export default function Home() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  usePageMeta(seoFor(lang, "home"));
   const ideas = t("home.ideas.items");
   const benefits = t("home.benefits.items");
   const steps = t("home.install.steps");
@@ -20,10 +23,10 @@ export default function Home() {
           <p className="hero__subtitle">{t("home.hero.subtitle")}</p>
           <p className="hero__lead">{t("home.hero.lead")}</p>
           <div className="hero__cta">
-            <Link to="/concepts" className="btn btn--primary">
+            <Link to={`/${lang}/concepts`} className="btn btn--primary">
               {t("home.hero.ctaConcepts")}
             </Link>
-            <Link to="/installation" className="btn btn--ghost">
+            <Link to={`/${lang}/installation`} className="btn btn--ghost">
               {t("home.hero.ctaInstall")}
             </Link>
             <a
@@ -64,7 +67,7 @@ export default function Home() {
 
           <p className="proof__footnote">{t("home.proof.footnote")}</p>
           <div className="proof__cta">
-            <Link to="/concepts" className="btn btn--primary">
+            <Link to={`/${lang}/concepts`} className="btn btn--primary">
               {t("home.proof.cta")}
             </Link>
           </div>

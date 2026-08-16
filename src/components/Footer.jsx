@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useI18n } from "../i18n/I18nContext.jsx";
 
 export default function Footer() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   return (
     <footer className="footer">
@@ -13,10 +13,10 @@ export default function Footer() {
           <p className="footer__text">{t("footer.forOpencode")}</p>
         </div>
         <div className="footer__links">
-          <Link to="/concepts">{t("nav.concepts")}</Link>
-          <Link to="/features">{t("nav.features")}</Link>
-          <Link to="/installation">{t("nav.installation")}</Link>
-          <Link to="/docs">{t("nav.docs")}</Link>
+          <Link to={`/${lang}/concepts`}>{t("nav.concepts")}</Link>
+          <Link to={`/${lang}/features`}>{t("nav.features")}</Link>
+          <Link to={`/${lang}/installation`}>{t("nav.installation")}</Link>
+          <Link to={`/${lang}/docs`}>{t("nav.docs")}</Link>
           <a href={t("common.repoUrl")} target="_blank" rel="noopener noreferrer">
             {t("common.github")}
           </a>

@@ -5,12 +5,13 @@ import App from "./App.jsx";
 import { I18nProvider } from "./i18n/I18nContext.jsx";
 import "./index.css";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.hydrateRoot(
+  document.getElementById("root"),
   <React.StrictMode>
-    <I18nProvider>
-      <BrowserRouter basename="/wpm-site">
+    <BrowserRouter basename="/wpm-site">
+      <I18nProvider>
         <App />
-      </BrowserRouter>
-    </I18nProvider>
+      </I18nProvider>
+    </BrowserRouter>
   </React.StrictMode>,
 );

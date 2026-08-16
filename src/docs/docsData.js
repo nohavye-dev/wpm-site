@@ -35,3 +35,25 @@ export function docTitle(content) {
   const m = content.match(/^#\s+(.+)$/m);
   return m ? m[1].trim() : null;
 }
+
+export function docDescription(content) {
+  const lines = content.split("\n");
+  let paragraph = [];
+  let started = false;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!started) {
+      if (line.startsWith("#") || line === "") continue;
+      started = true;
+    }
+    if (line === "" || line.startsWith("#")) break;
+    paragraph.push(line);
+  }
+  const text = paragraph
+    .join(" ")
+    .replace(/[*_`>]/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length > 155 ? text.slice(0, 152).trimEnd() + "…" : text;
+}

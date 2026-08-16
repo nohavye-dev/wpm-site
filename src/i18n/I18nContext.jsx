@@ -1,9 +1,26 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import fr from "./fr.js";
 import en from "./en.js";
 
 const dictionaries = { fr, en };
 const I18nContext = createContext(null);
+
+export const LANGS = ["fr", "en"];
+
+export function langFromPath(pathname) {
+  return pathname.startsWith("/en") ? "en" : "fr";
+}
+
+export function switchLangPath(pathname, lang) {
+  const parts = pathname.split("/");
+  if (parts[1] === "fr" || parts[1] === "en") {
+    parts[1] = lang;
+  } else {
+    parts.splice(1, 0, lang);
+  }
+  return parts.join("/");
+}
 
 function resolve(path, obj) {
   return path
@@ -12,16 +29,10 @@ function resolve(path, obj) {
 }
 
 export function I18nProvider({ children }) {
-  const [lang, setLang] = useState(() => {
-    const stored = localStorage.getItem("wpm-site-lang");
-    if (stored === "fr" || stored === "en") return stored;
-    return navigator.language && navigator.language.toLowerCase().startsWith("fr")
-      ? "fr"
-      : "en";
-  });
+  const { pathname } = useLocation();
+  const lang = langFromPath(pathname);
 
   useEffect(() => {
-    localStorage.setItem("wpm-site-lang", lang);
     document.documentElement.lang = lang;
   }, [lang]);
 
@@ -29,7 +40,6 @@ export function I18nProvider({ children }) {
     const dict = dictionaries[lang];
     return {
       lang,
-      setLang,
       t: (path, vars) => {
         let text = resolve(path, dict);
         if (text == null) text = resolve(path, dictionaries.en);

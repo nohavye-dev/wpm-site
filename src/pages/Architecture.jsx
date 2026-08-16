@@ -1,8 +1,11 @@
 import { useI18n } from "../i18n/I18nContext.jsx";
 import DataTable from "../components/DataTable.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
+import { seoFor } from "../seo.js";
 
 export default function Architecture() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  usePageMeta(seoFor(lang, "architecture"));
   const components = t("architecture.components");
   const flowSteps = t("architecture.flow.steps");
 

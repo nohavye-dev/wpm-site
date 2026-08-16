@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { NavLink, Link } from "react-router-dom";
-import { useI18n } from "../i18n/I18nContext.jsx";
+import { NavLink, Link, useLocation } from "react-router-dom";
+import { useI18n, switchLangPath } from "../i18n/I18nContext.jsx";
 
 export default function Navbar() {
-  const { t, lang, setLang } = useI18n();
+  const { t, lang } = useI18n();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -16,19 +17,19 @@ export default function Navbar() {
   }, [open]);
 
   const links = [
-    { to: "/", label: t("nav.home") },
-    { to: "/concepts", label: t("nav.concepts") },
-    { to: "/features", label: t("nav.features") },
-    { to: "/installation", label: t("nav.installation") },
-    { to: "/architecture", label: t("nav.architecture") },
-    { to: "/docs", label: t("nav.docs") },
+    { to: `/${lang}`, label: t("nav.home") },
+    { to: `/${lang}/concepts`, label: t("nav.concepts") },
+    { to: `/${lang}/features`, label: t("nav.features") },
+    { to: `/${lang}/installation`, label: t("nav.installation") },
+    { to: `/${lang}/architecture`, label: t("nav.architecture") },
+    { to: `/${lang}/docs`, label: t("nav.docs") },
     { href: t("common.repoUrl"), label: t("common.github"), external: true },
   ];
 
   return (
     <header className="navbar">
       <div className="navbar__inner container">
-        <Link to="/" className="navbar__brand">
+        <Link to={`/${lang}`} className="navbar__brand">
           <span className="navbar__logo">WPM</span>
           <span className="navbar__tagline">Weighted Persistent Memory</span>
         </Link>
@@ -52,7 +53,7 @@ export default function Navbar() {
               <NavLink
                 key={l.to}
                 to={l.to}
-                end={l.to === "/"}
+                end={l.to === `/${lang}`}
                 className={({ isActive }) =>
                   isActive ? "navbar__link is-active" : "navbar__link"
                 }
@@ -64,21 +65,21 @@ export default function Navbar() {
           )}
         </nav>
         <div className="navbar__lang">
-          <button
-            type="button"
+          <Link
+            to={switchLangPath(pathname, "fr")}
             className={lang === "fr" ? "lang-btn is-active" : "lang-btn"}
-            onClick={() => setLang("fr")}
+            onClick={() => setOpen(false)}
           >
             FR
-          </button>
+          </Link>
           <span className="lang-sep">/</span>
-          <button
-            type="button"
+          <Link
+            to={switchLangPath(pathname, "en")}
             className={lang === "en" ? "lang-btn is-active" : "lang-btn"}
-            onClick={() => setLang("en")}
+            onClick={() => setOpen(false)}
           >
             EN
-          </button>
+          </Link>
         </div>
         <button
           type="button"

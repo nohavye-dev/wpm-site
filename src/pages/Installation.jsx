@@ -1,9 +1,12 @@
 import { useI18n } from "../i18n/I18nContext.jsx";
 import CodeBlock from "../components/CodeBlock.jsx";
 import DataTable from "../components/DataTable.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
+import { seoFor } from "../seo.js";
 
 export default function Installation() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  usePageMeta(seoFor(lang, "installation"));
   const steps = t("installation.steps");
 
   return (

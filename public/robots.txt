@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nohavye-dev.github.io/wpm-site/sitemap.xml

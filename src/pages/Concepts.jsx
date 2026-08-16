@@ -1,5 +1,7 @@
 import { useI18n } from "../i18n/I18nContext.jsx";
 import DataTable from "../components/DataTable.jsx";
+import usePageMeta from "../hooks/usePageMeta.js";
+import { seoFor } from "../seo.js";
 
 function Section({ section }) {
   const { t } = useI18n();
@@ -20,7 +22,8 @@ function Section({ section }) {
 }
 
 export default function Concepts() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  usePageMeta(seoFor(lang, "concepts"));
   const sections = t("concepts.sections");
   const objectives = t("concepts.objectives.items");
 
