@@ -38,10 +38,6 @@ export default function DocPage() {
         <span>{title}</span>
       </nav>
 
-      <h1 className="page__title" style={{ marginBottom: "24px" }}>
-        {title}
-      </h1>
-
       <Markdown content={doc.content} />
 
       <p className="note" style={{ marginTop: "32px" }}>

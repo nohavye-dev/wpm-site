@@ -17,7 +17,7 @@ export default function DataTable({ data }) {
           {data.rows.map((row, i) => (
             <tr key={i}>
               {row.map((cell, j) => (
-                <td key={j} className={j === 0 ? "mono-cell" : undefined}>
+                <td key={j} className={j === 0 ? "mono-cell" : undefined} data-label={data.cols[j]}>
                   {cell}
                 </td>
               ))}

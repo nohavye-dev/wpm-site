@@ -496,7 +496,8 @@ code {
 /* ── Page header / prose ────────────────────────────── */
 
 .page {
-  padding: 56px 0 72px;
+  padding-top: 56px;
+  padding-bottom: 72px;
 }
 
 .page__title {
@@ -859,4 +860,81 @@ code {
   .cards { grid-template-columns: 1fr; }
   .docs-item { flex-direction: column; gap: 4px; }
   .docs-item__path { min-width: 0; }
+
+  /* Wide tables → stacked cards (no horizontal scroll) */
+  .table-wrap table,
+  .table-wrap thead,
+  .table-wrap tbody,
+  .table-wrap tr,
+  .table-wrap td,
+  .md-table-wrap table,
+  .md-table-wrap thead,
+  .md-table-wrap tbody,
+  .md-table-wrap tr,
+  .md-table-wrap td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-wrap thead,
+  .md-table-wrap thead {
+    display: none;
+  }
+
+  .table-wrap {
+    border: none;
+    border-radius: 0;
+  }
+
+  .table-wrap tr,
+  .md-table-wrap tr {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+
+  .table-wrap td,
+  .md-table-wrap td {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 5px 0;
+    border: none;
+    text-align: left;
+  }
+
+  .table-wrap td::before,
+  .md-table-wrap td::before {
+    content: attr(data-label);
+    color: var(--text-dim);
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .table-wrap tr td:first-child,
+  .md-table-wrap tr td:first-child {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--accent-2);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+    padding-bottom: 8px;
+  }
+
+  .table-wrap tr td:first-child::before,
+  .md-table-wrap tr td:first-child::before {
+    display: none;
+  }
+
+  .table-wrap td code,
+  .md-table-wrap td code,
+  .table-wrap .mono-cell,
+  .md-table-wrap .mono-cell {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }

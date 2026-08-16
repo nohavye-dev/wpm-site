@@ -8,11 +8,7 @@ function Section({ section }) {
     <div className="block" id={section.id}>
       <h3 className="block__title">{section.title}</h3>
       <p className="block__text">{section.text}</p>
-      {section.table && (
-        <div className="table-wrap">
-          <DataTable data={section.table} />
-        </div>
-      )}
+      {section.table && <DataTable data={section.table} />}
       {section.note && <p className="note">{section.note}</p>}
       {section.analogy && (
         <p className="analogy">
