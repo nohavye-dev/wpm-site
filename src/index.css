@@ -1171,6 +1171,7 @@ code {
   .table-wrap {
     border: none;
     border-radius: 0;
+    overflow-x: hidden;
   }
 
   .table-wrap tr,
@@ -1191,6 +1192,7 @@ code {
     border: none;
     text-align: left;
     min-width: 0;
+    overflow: hidden;
   }
 
   .table-wrap td::before,
