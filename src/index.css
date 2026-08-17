@@ -675,6 +675,9 @@ code {
   border-radius: 6px;
   padding: 6px 10px;
   display: inline-block;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
   margin-bottom: 8px;
 }
 
@@ -1187,6 +1190,7 @@ code {
     padding: 5px 0;
     border: none;
     text-align: left;
+    min-width: 0;
   }
 
   .table-wrap td::before,
