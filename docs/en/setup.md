@@ -8,13 +8,11 @@ you: no manual OpenCode configuration is needed.
 
 ## 1. Global installation
 
-From the repository root:
-
 ```bash
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/nohavye-dev/wpm-system/main/install.sh | bash
 ```
 
-What `install.sh` does:
+What the script does:
 
 1. creates a dedicated Python environment (`~/.local/share/wpm-system/venv`) and
    installs the server in it;
@@ -90,7 +88,6 @@ project".
 ```bash
 wpm disable      # removes wpm.config.json (data is kept)
 wpm uninstall    # complete global removal (venv, binary, plugin); --force to skip the confirmation
-./install.sh uninstall   # equivalent, from the repository root
 ```
 
 ---

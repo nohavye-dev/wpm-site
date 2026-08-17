@@ -92,7 +92,7 @@ export default {
       title: "Start in 3 commands",
       steps: [
         {
-          cmd: "./install.sh",
+          cmd: "curl -fsSL https://raw.githubusercontent.com/nohavye-dev/wpm-system/main/install.sh | bash",
           text: "Installs the server + the plugin (global, once)",
         },
         {
@@ -326,8 +326,8 @@ export default {
       {
         id: "global",
         title: "1. Global installation",
-        text: "From the repository root:",
-        cmd: "./install.sh",
+        text: "From your terminal:",
+        cmd: "curl -fsSL https://raw.githubusercontent.com/nohavye-dev/wpm-system/main/install.sh | bash",
         what: "What install.sh does:",
         items: [
           "creates a dedicated Python environment (~/.local/share/wpm-system/venv) and installs the server in it",
@@ -378,7 +378,6 @@ export default {
         cmds: [
           ["wpm disable", "removes wpm.config.json (data is kept)"],
           ["wpm uninstall", "complete global removal (venv, binary, plugin); --force to skip confirmation"],
-          ["./install.sh uninstall", "equivalent, from the repository root"],
         ],
       },
     ],
