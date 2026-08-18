@@ -36,6 +36,39 @@ export function docTitle(content) {
   return m ? m[1].trim() : null;
 }
 
+export function slugify(text) {
+  const slug = text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return slug || "section";
+}
+
+function cleanInline(text) {
+  return text
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[*_`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function docHeadings(content) {
+  const headings = [];
+  for (const line of content.split("\n")) {
+    const m = line.match(/^(#{2,3})\s+(.+)$/);
+    if (!m) continue;
+    const text = cleanInline(m[2]);
+    if (!text) continue;
+    headings.push({ level: m[1].length, text, slug: slugify(text) });
+  }
+  return headings;
+}
+
 export function docDescription(content) {
   const lines = content.split("\n");
   let paragraph = [];

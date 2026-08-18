@@ -488,6 +488,9 @@ export default {
     githubLabel: "wpm-system on GitHub",
     notFound: "This documentation page does not exist.",
     backToDocs: "Back to documentation",
+    onThisPage: "On this page",
+    previous: "Previous",
+    next: "Next",
   },
 
   seo: {

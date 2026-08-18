@@ -3,6 +3,7 @@ import remarkGfm from "remark-gfm";
 import { Link } from "react-router-dom";
 import { Children, cloneElement } from "react";
 import { useI18n } from "../i18n/I18nContext.jsx";
+import { slugify } from "./docsData.js";
 
 function DocLink({ href, children }) {
   const { lang } = useI18n();
@@ -27,6 +28,37 @@ function DocLink({ href, children }) {
     );
   }
   return <a href={href}>{children}</a>;
+}
+
+function textOf(node) {
+  if (node == null) return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join("");
+  if (typeof node === "object" && node.props) return textOf(node.props.children);
+  return "";
+}
+
+function Heading({ level, children }) {
+  const id = slugify(textOf(children));
+  if (level === 2 || level === 3) {
+    return (
+      <>
+        {level === 2 ? (
+          <h2 id={id}>
+            <a href={`#${id}`} className="md-anchor" aria-hidden="true">#</a>
+            {children}
+          </h2>
+        ) : (
+          <h3 id={id}>
+            <a href={`#${id}`} className="md-anchor" aria-hidden="true">#</a>
+            {children}
+          </h3>
+        )}
+      </>
+    );
+  }
+  const Tag = `h${level}`;
+  return <Tag>{children}</Tag>;
 }
 
 function collectHeaders(children) {
@@ -69,6 +101,10 @@ export default function Markdown({ content }) {
         remarkPlugins={[remarkGfm]}
         components={{
           a: (props) => <DocLink {...props} />,
+          h1: (props) => <Heading level={1} {...props} />,
+          h2: (props) => <Heading level={2} {...props} />,
+          h3: (props) => <Heading level={3} {...props} />,
+          h4: (props) => <Heading level={4} {...props} />,
           table: (props) => (
             <div className="md-table-wrap">
               <table>{labelCells(props.children, collectHeaders(props.children))}</table>
