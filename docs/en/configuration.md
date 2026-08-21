@@ -60,7 +60,8 @@ the file (no env variable).
 ### `response_language` — response language (optional, default auto)
 
 Sets the language of the agent's **responses, summaries and reports** — **not**
-the stored content, which stays in English.
+the stored content, which stays in its native language (the embedding model
+is multilingual).
 
 - Absent, `null` or `"auto"`: the agent responds in the user's language.
 - Fixed value (e.g. `"french"`): the agent always responds in that language.
@@ -114,7 +115,7 @@ You only replace what you need:
 ```
 
 The full detail of each sub-section, with its default values, is in
-[`wpm-mcp-server/wpm.config.example.json`](../wpm-mcp-server/wpm.config.example.json).
+[`wpm-mcp-server/wpm.config.example.json`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/wpm.config.example.json).
 
 ---
 
@@ -125,7 +126,7 @@ The full detail of each sub-section, with its default values, is in
 | `WPM_CONFIG_PATH` | which JSON file is read |
 | `WPM_DB_PATH` | `db_path` |
 | `WPM_RESPONSE_LANGUAGE` | `response_language` |
-| `WPM_EMBEDDING_MODEL` | embedding model (default `all-MiniLM-L6-v2`) |
+| `WPM_EMBEDDING_MODEL` | embedding model (default `paraphrase-multilingual-MiniLM-L12-v2`) |
 
 The `domain` keys have no env variable: only adjustable via the file.
 
@@ -134,6 +135,8 @@ The `domain` keys have no env variable: only adjustable via the file.
 ## Embeddings (fixed)
 
 Embeddings use ONNX Runtime + HuggingFace tokenizers, model
-`all-MiniLM-L6-v2` (384 dimensions), downloaded at first start and cached.
-Changing the model (`WPM_EMBEDDING_MODEL`) after inserting entries requires
-re-embedding the database (delete `.wpm/wpm.db`).
+`paraphrase-multilingual-MiniLM-L12-v2` (384 dimensions, 50+ languages),
+downloaded at first start and cached. Changing the model
+(`WPM_EMBEDDING_MODEL`) after inserting entries requires re-embedding the
+database: run `wpm reembed` at the project root (the server refuses to query a
+database whose vectors come from another model until then).

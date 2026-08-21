@@ -2,7 +2,7 @@
 
 Ce document explique **ce que fait WPM et pourquoi**, avec le moins de
 technique possible. Pour la mécanique précise (schéma de données, formules,
-protocole), voir [`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md) et
+protocole), voir [`wpm-mcp-server/README.md`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md) et
 [`configuration.md`](configuration.md).
 
 ---
@@ -182,7 +182,7 @@ fiabilité.
 WPM est une **expérience en cours**. Le modèle de confiance (vitesses de
 décroissance, poids, seuils) est calé sur des valeurs **raisonnées mais
 encore peu mesurées** ; il faudra le valider sur de vrais projets longs.
-Voir [`internal/`](internal/) pour les notes de conception et le plan de
+Voir [`docs/internals/`](https://github.com/nohavye-dev/wpm-system/tree/main/docs/internals) pour les notes de conception et le plan de
 validation.
 
 ---
@@ -190,6 +190,6 @@ validation.
 ## Pour aller plus loin
 
 - [`setup.md`](setup.md) — installer et activer WPM sur un projet.
-- [`workflows.md`](workflows.md) — les commandes `learn`, `map`, `bootstrap`, `audit`, `patterns`.
+- [`workflows.md`](workflows.md) — les commandes `wpm-learn`, `wpm-map`, `wpm-bootstrap`, `wpm-audit`, `wpm-patterns`, `wpm-persist`.
 - [`agent-behavior.md`](agent-behavior.md) — le détail de ce que l'agent doit faire.
-- [`../wpm-mcp-server/README.md`](../wpm-mcp-server/README.md) — l'aspect technique du serveur.
+- [`wpm-mcp-server/README.md`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md) — l'aspect technique du serveur.

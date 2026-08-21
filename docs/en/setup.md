@@ -16,7 +16,7 @@ What the script does:
 
 1. creates a dedicated Python environment (`~/.local/share/wpm-system/venv`) and
    installs the server in it;
-2. pre-downloads the embedding model (~80 MB) for a first start
+2. pre-downloads the embedding model (~120 MB) for a first start
    offline;
 3. installs the `wpm` command (`~/.local/bin/wpm`);
 4. installs the OpenCode plugin in `~/.config/opencode/plugins/` (global).
@@ -100,4 +100,4 @@ OpenCode configuration an `mcp.wpm` entry pointing to
 `wpm.config.json`, plus the `wpm_*` permission. So you have **nothing to
 declare** in `opencode.json`. To wire the server manually (outside OpenCode,
 or to understand), see
-[`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md).
+[`wpm-mcp-server/README.md`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md).

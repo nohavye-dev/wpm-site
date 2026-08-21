@@ -1,5 +1,7 @@
 # weighted persistent memory
 .wpm/
+.wpm copy/
+wpm.json
 
 # dependencies / build
 node_modules/

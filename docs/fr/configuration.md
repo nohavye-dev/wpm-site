@@ -60,7 +60,8 @@ dans le fichier (pas de variable d'env).
 ### `response_language` — langue des réponses (optionnel, défaut auto)
 
 Fixe la langue des **réponses, résumés et rapports** de l'agent — **pas**
-le contenu stocké, qui reste en anglais.
+le contenu stocké, qui reste dans sa langue native (le modèle d'embedding
+est multilingue).
 
 - Absent, `null` ou `"auto"` : l'agent répond dans la langue de
   l'utilisateur.
@@ -115,7 +116,7 @@ On ne remplace que ce dont on a besoin :
 ```
 
 Le détail complet de chaque sous-section, avec ses valeurs par défaut, est
-dans [`wpm-mcp-server/wpm.config.example.json`](../wpm-mcp-server/wpm.config.example.json).
+dans [`wpm-mcp-server/wpm.config.example.json`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/wpm.config.example.json).
 
 ---
 
@@ -126,7 +127,7 @@ dans [`wpm-mcp-server/wpm.config.example.json`](../wpm-mcp-server/wpm.config.exa
 | `WPM_CONFIG_PATH` | quel fichier JSON est lu |
 | `WPM_DB_PATH` | `db_path` |
 | `WPM_RESPONSE_LANGUAGE` | `response_language` |
-| `WPM_EMBEDDING_MODEL` | modèle d'embedding (défaut `all-MiniLM-L6-v2`) |
+| `WPM_EMBEDDING_MODEL` | modèle d'embedding (défaut `paraphrase-multilingual-MiniLM-L12-v2`) |
 
 Les clés de `domain` n'ont pas de variable d'env : réglables uniquement via
 le fichier.
@@ -136,6 +137,9 @@ le fichier.
 ## Embeddings (fixes)
 
 Les embeddings utilisent ONNX Runtime + tokenizers HuggingFace, modèle
-`all-MiniLM-L6-v2` (384 dimensions), téléchargé au premier démarrage et mis
-en cache. Changer de modèle (`WPM_EMBEDDING_MODEL`) après avoir inséré des
-entrées nécessite de ré-embedder la base (supprimez `.wpm/wpm.db`).
+`paraphrase-multilingual-MiniLM-L12-v2` (384 dimensions, 50+ langues),
+téléchargé au premier démarrage et mis en cache. Changer de modèle
+(`WPM_EMBEDDING_MODEL`) après avoir inséré des entrées nécessite de
+ré-embedder la base : lancez `wpm reembed` à la racine du projet (le serveur
+refuse de requêter une base dont les vecteurs viennent d'un autre modèle tant
+que ce n'est pas fait).

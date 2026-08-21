@@ -2,7 +2,7 @@
 
 This document describes **what the agent must do** to get the best out of the
 memory once the project is activated. This is not server technology (see
-[`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md)),
+[`wpm-mcp-server/README.md`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md)),
 it is the behavioral handbook.
 
 - **The essentials** (below) are injected at the start of every session and
@@ -34,8 +34,8 @@ current topic → `store_entry` as soon as a durable fact appears →
 - **Reliability over completeness**: a false entry is worse than a missing
   one; better an underpopulated memory than a polluted one.
 - **Write at any time**: the writing tools are used in plan mode, build mode
-  or any mode. Plan mode is not an excuse to defer. If the host blocks the
-  write, retry or switch to build mode.
+  or any mode — the plugin grants the `wpm_*` tools in every mode, including
+  plan mode. If the host still blocks a write, retry.
 
 > The detail of each rule (choice of type, source, evidence hierarchy…) lives
 > in the **description of each tool**, re-read at every call — so applied
@@ -47,10 +47,10 @@ current topic → `store_entry` as soon as a durable fact appears →
 
 ### 1. Content language
 
-All stored `content` must be **in English** (embedding consistency).
-Translate before storing. However, the agent's responses and reports stay in
-the user's language — unless `response_language` is set in the config (see
-[`configuration.md`](configuration.md)).
+All stored `content` stays **in its native language** (the embedding model is
+multilingual). Don't translate before storing. However, the agent's responses
+and reports stay in the user's language — unless `response_language` is set in
+the config (see [`configuration.md`](configuration.md)).
 
 ### 2. When to write
 
@@ -142,14 +142,14 @@ over-link.
 
 ### 11. Dedicated workflows
 
-The `learn`/`map`/`bootstrap`/`audit`/`patterns` workflows are the
+The `wpm-learn`/`wpm-map`/`wpm-bootstrap`/`wpm-audit`/`wpm-patterns` workflows are the
 **controlled** ingestion; they do not replace incremental memorization. See
 [`workflows.md`](workflows.md).
 
 ### 12. Lifecycle: pin, deprecate, restore
 
 - **`pin_entry`** — freeze the confidence (no more decay). For foundational
-  decisions, imposed conventions, entries validated 3+ times (>0.8). Never an
+  decisions, imposed conventions, entries validated 3+ times (>0.7). Never an
   `insight`/`bug_pattern`/`execution_result` nor a disputed entry.
 - **`deprecate_entry`** — exclude an obsolete entry (settled contradiction,
   gone code, fixed bug). Reversible.
@@ -158,7 +158,7 @@ The `learn`/`map`/`bootstrap`/`audit`/`patterns` workflows are the
 
 ### 13. What to never do
 
-- Store in a language other than English.
+- Translate content into English before storing.
 - Create an entry without checking that it doesn't already exist.
 - Validate with `agent_reasoning` to inflate a score.
 - Delete or overwrite a contradicted entry.
@@ -167,6 +167,6 @@ The `learn`/`map`/`bootstrap`/`audit`/`patterns` workflows are the
 - Over-link entries with no real relation.
 - Pin an `insight`/`bug_pattern`/`execution_result` or an unvalidated entry.
 - Deprecate without being certain of the obsolescence.
-- Ignore the problems reported by `audit`.
-- Defer persistence because you're in plan mode — if the write is blocked,
-  switch to build mode.
+- Ignore the problems reported by `wpm-audit`.
+- Defer persistence because you're in plan mode — the `wpm_*` tools are
+  allowed in plan mode.

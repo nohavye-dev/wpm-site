@@ -2,7 +2,7 @@
 
 Ce document décrit **ce que l'agent doit faire** pour tirer le meilleur
 parti de la mémoire une fois le projet activé. Ce n'est pas de la technique
-de serveur (voir [`wpm-mcp-server/README.md`](../wpm-mcp-server/README.md)),
+de serveur (voir [`wpm-mcp-server/README.md`](https://github.com/nohavye-dev/wpm-system/blob/main/wpm-mcp-server/README.md)),
 c'est le mode d'emploi comportemental.
 
 - **L'essentiel** (ci-dessous) est injecté au début de chaque session et
@@ -34,8 +34,9 @@ avec preuve une fois confirmé.
 - **Fiabilité avant exhaustivité** : une entrée fausse est pire qu'une
   entrée absente ; mieux vaut une mémoire pauvre qu'une mémoire polluée.
 - **Écrire à tout moment** : les outils d'écriture s'utilisent en mode plan,
-  build ou n'importe quel mode. Le mode plan n'est pas une excuse pour
-  différer. Si le host bloque, réessayer ou basculer en mode build.
+  build ou n'importe quel mode — le plugin autorise les outils `wpm_*` dans
+  tous les modes, y compris le mode plan. Si le host bloque malgré tout,
+  réessayer.
 
 > Le détail de chaque règle (choix du type, de la source, hiérarchie des
 > preuves…) vit dans la **description de chaque outil**, relue à chaque
@@ -47,10 +48,11 @@ avec preuve une fois confirmé.
 
 ### 1. Langue du contenu
 
-Tout `content` stocké doit être **en anglais** (cohérence des embeddings).
-Traduire avant de stocker. En revanche, les réponses et rapports de l'agent
-restent dans la langue de l'utilisateur — sauf si `response_language` est
-fixé dans la config (voir [`configuration.md`](configuration.md)).
+Tout `content` stocké reste **dans sa langue native** (le modèle d'embedding
+est multilingue). Ne pas traduire avant de stocker. En revanche, les réponses
+et rapports de l'agent restent dans la langue de l'utilisateur — sauf si
+`response_language` est fixé dans la config (voir
+[`configuration.md`](configuration.md)).
 
 ### 2. Quand écrire
 
@@ -145,14 +147,14 @@ pas sur-lier.
 
 ### 11. Workflows dédiés
 
-Les workflows `learn`/`map`/`bootstrap`/`audit`/`patterns` sont l'ingestion
+Les workflows `wpm-learn`/`wpm-map`/`wpm-bootstrap`/`wpm-audit`/`wpm-patterns` sont l'ingestion
 **contrôlée** ; ils ne remplacent pas la mémorisation incrémentale. Voir
 [`workflows.md`](workflows.md).
 
 ### 12. Cycle de vie : pin, deprecate, restore
 
 - **`pin_entry`** — figer la confiance (plus de decay). Pour les décisions
-  fondatrices, conventions imposées, entrées validées 3+ fois (>0.8). Jamais
+  fondatrices, conventions imposées, entrées validées 3+ fois (>0.7). Jamais
   un `insight`/`bug_pattern`/`execution_result` ni une entrée contestée.
 - **`deprecate_entry`** — exclure une entrée obsolète (contradiction
   tranchée, code disparu, bug corrigé). Réversible.
@@ -161,7 +163,7 @@ Les workflows `learn`/`map`/`bootstrap`/`audit`/`patterns` sont l'ingestion
 
 ### 13. Ce qu'il ne faut jamais faire
 
-- Stocker dans une autre langue que l'anglais.
+- Traduire le contenu en anglais avant de stocker.
 - Créer une entrée sans vérifier qu'elle n'existe pas déjà.
 - Valider avec `agent_reasoning` pour gonfler un score.
 - Supprimer ou écraser une entrée contredite.
@@ -171,6 +173,6 @@ Les workflows `learn`/`map`/`bootstrap`/`audit`/`patterns` sont l'ingestion
 - Épingler un `insight`/`bug_pattern`/`execution_result` ou une entrée non
   validée.
 - Déprécier sans être certain de l'obsolescence.
-- Ignorer les problèmes signalés par `audit`.
-- Différer la persistance parce qu'on est en mode plan — si l'écriture est
-  bloquée, basculer en mode build.
+- Ignorer les problèmes signalés par `wpm-audit`.
+- Différer la persistance parce qu'on est en mode plan — les outils `wpm_*`
+  sont autorisés en mode plan.
